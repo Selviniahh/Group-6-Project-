@@ -1,0 +1,19 @@
+# Ignore build output directories
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.idea/
+*.sln.iml
+node_modules/
+*.log
+*.tmp
+*.temp
+*.js.map
+.env
+.vscode/
+.vs/
+*.vcxproj.user
+*.vcxproj.filters
