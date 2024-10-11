@@ -1,4 +1,4 @@
-namespace WebApplication1.Models;
+namespace Group6WebProject.Models;
 
 public class MemberPreferences
 {
