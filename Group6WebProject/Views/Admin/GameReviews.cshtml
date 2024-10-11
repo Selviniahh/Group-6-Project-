@@ -1,0 +1,37 @@
+﻿@model List<Review>;
+
+@{
+    ViewBag.Title = "title";
+    Layout = "_Layout";
+}
+
+<h2>Game Reviews</h2>
+<form method="post" action="/Admin/AddReview">
+    <label for="GameTitle">Game Title</label>
+    <input type="text" id="GameTitle" name="GameTitle" required />
+    <label for="ReviewText">Review</label>
+    <textarea id="ReviewText" name="ReviewText" required></textarea>
+    <button type="submit">Add Review</button>
+</form>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Game Title</th>
+        <th>Review</th>
+        <th>Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var review in Model)
+    {
+        <tr>
+            <td>@review.Id</td>
+            <td>@review.GameTitle</td>
+            <td>@review.ReviewText</td>
+            <td>@review.Status</td>
+        </tr>
+    }
+    </tbody>
+</table>
