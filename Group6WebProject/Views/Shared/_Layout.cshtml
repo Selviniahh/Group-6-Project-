@@ -32,6 +32,20 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Admin Panel</a>
                         </li>
                     </ul>
+                    
+                    @* If user is authenticated, display a greeting message and a logout button, otherwise display login and register buttons. *@
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                    <form asp-action="Logout" asp-controller="User" method="post" class="form-inline">
+                        <span class="navbar-text mr-2">Hello, @User.Identity.Name</span>
+                        <button type="submit" class="btn btn-link">Logout</button>
+                    </form>
+                    }
+                    else
+                    {
+                    <a class="nav-link text-dark" asp-controller="User" asp-action="Login">Login</a>
+                    <a class="nav-link text-dark" asp-controller="User" asp-action="Register">Register</a>
+                    }
                 </div>
             </div>
         </nav>
