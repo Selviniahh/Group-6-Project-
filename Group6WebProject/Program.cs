@@ -13,7 +13,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite
 builder.Services.AddTransient<IEmailService, EmailService>();
 
 //Set the default authentication scheme to cookies
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme) 
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.LoginPath = "/User/Login";
@@ -39,8 +39,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}"); //I am changing this already existing line
+    "default",
+    "{controller=Home}/{action=Index}/{id?}"); //I am changing this already existing line
 
 app.Run();
 

@@ -14,11 +14,7 @@ public class PreferencesController : Controller
     [HttpPost]
     public IActionResult SavePreferences(MemberPreferences preferences)
     {
-        if (ModelState.IsValid)
-        {
-            return RedirectToAction("Success");
-            
-        }
+        if (ModelState.IsValid) return RedirectToAction("Success");
         return View("Index", preferences);
     }
 
@@ -26,5 +22,4 @@ public class PreferencesController : Controller
     {
         return View();
     }
-    
 }

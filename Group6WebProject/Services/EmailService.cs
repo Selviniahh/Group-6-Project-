@@ -38,9 +38,7 @@ public class EmailService : IEmailService
                 emailMessage.IsBodyHtml = true;
 
                 await client.SendMailAsync(emailMessage);
-                
             }
         }
     }
-
 }

@@ -8,9 +8,9 @@
 <h2>Game Management</h2>
 <form method="post" action="/Admin/AddGame">
     <label for="Title">Game Title</label>
-    <input type="text" id="Title" name="Title" required />
+    <input type="text" id="Title" name="Title" required/>
     <label for="Genre">Genre</label>
-    <input type="text" id="Genre" name="Genre" required />
+    <input type="text" id="Genre" name="Genre" required/>
     <button type="submit">Add Game</button>
 </form>
 
@@ -25,11 +25,11 @@
     <tbody>
     @foreach (var game in Model)
     {
-    <tr>
-        <td>@game.Id</td>
-        <td>@game.Title</td>
-        <td>@game.Genre</td>
-    </tr>
+        <tr>
+            <td>@game.Id</td>
+            <td>@game.Title</td>
+            <td>@game.Genre</td>
+        </tr>
     }
     </tbody>
 </table>

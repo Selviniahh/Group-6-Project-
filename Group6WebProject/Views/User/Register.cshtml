@@ -1,13 +1,13 @@
 @model Group6WebProject.Models.RegisterViewModel
 
 @{
-ViewData["Title"] = "Register a user";
+    ViewData["Title"] = "Register a user";
 }
 
 <h2>Register to website</h2>
 
 <form asp-action="Register" method="post">
-    
+
     @* dipslay all kinds of error *@
     <div asp-validation-summary="All" class="text-danger"></div>
 

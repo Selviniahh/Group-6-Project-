@@ -12,7 +12,7 @@
     <h1> Hello @User.Identity.Name </h1>
     @* <h2>Your email is: @User.FindFirst("Email")?.Value</h2> *@
     @* <h2>Your ID is: @User.FindFirst("UserID")?.Value</h2> *@
-    
+
     <h2>Your email is: @User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value</h2>
     <h2>Your ID is: @User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value</h2>
 }

@@ -5,9 +5,9 @@ namespace Group6WebProject.Controllers;
 
 public class AdminController : Controller
 {
-    private static List<Game> games = new List<Game>();
-    private static List<Event> events = new List<Event>();
-    private static List<Review> reviews = new List<Review>();
+    private static List<Game> games = new();
+    private static List<Event> events = new();
+    private static List<Review> reviews = new();
 
     public IActionResult Index()
     {
@@ -52,6 +52,4 @@ public class AdminController : Controller
         reviews.Add(review);
         return RedirectToAction("GameReviews");
     }
-
-   
 }
