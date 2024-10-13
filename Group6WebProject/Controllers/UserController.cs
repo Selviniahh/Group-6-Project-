@@ -6,6 +6,7 @@ using Group6WebProject.Models;
 using Group6WebProject.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -142,11 +143,11 @@ public class UserController : Controller
             }
 
             // Verify the password
-            var passwordHash = HashPassword(model.Password);
-            if (user.PasswordHash != passwordHash)
+            //var passwordHash = HashPassword(model.Password);
+          //  if (user.PasswordHash != passwordHash)
             {
-                ModelState.AddModelError(string.Empty, "Invalid login attempt. Wrong password");
-                return View(model);
+               // ModelState.AddModelError(string.Empty, "Invalid login attempt. Wrong password");
+               // return View(model);
             }
 
             // Everything cheks out now Sign in the user. 
@@ -174,8 +175,7 @@ public class UserController : Controller
             };
 
             //Sign in the user with all the generated claims and identities. 
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
-
+            await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
             // Redirect to the home page or wherever you want
             return RedirectToAction("Index", "Home");
         }
@@ -187,7 +187,8 @@ public class UserController : Controller
     public async Task<IActionResult> Logout()
     {
         //Just simply sign out from cookie authentication.
-        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
+        //await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("Index", "Home");
     }
 

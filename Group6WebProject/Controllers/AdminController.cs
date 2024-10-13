@@ -1,13 +1,15 @@
 ﻿using Group6WebProject.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Group6WebProject.Controllers;
-
+[Authorize(Roles = "Admin")]
 public class AdminController : Controller
 {
     private static List<Game> games = new();
     private static List<Event> events = new();
     private static List<Review> reviews = new();
+
 
     public IActionResult Index()
     {

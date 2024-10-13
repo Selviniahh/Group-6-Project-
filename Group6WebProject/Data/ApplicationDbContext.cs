@@ -1,11 +1,13 @@
 using Group6WebProject.Controllers;
 using Group6WebProject.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Group6WebProject.Data;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : IdentityDbContext<User>
 {
     public DbSet<MemberPreferences> MemberPreferences { get; set; }
     public DbSet<User> Users { get; set; }
@@ -37,7 +39,7 @@ public class ApplicationDbContext : DbContext
                 UserID = 1,
                 Name = "Default User",
                 Email = "DefaultUser@example.com",
-                PasswordHash = UserController.HashPassword("123"), 
+                //PasswordHash = UserController.HashPassword("123"), 
                 Status = EnrollmentStatus.EnrollmentConfirmed
             });
     }

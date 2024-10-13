@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Group6WebProject.Data;
 using Group6WebProject.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,13 +14,29 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite
 builder.Services.AddTransient<IEmailService, EmailService>();
 
 //Set the default authentication scheme to cookies
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/User/Login";
-        options.AccessDeniedPath = "/User/AccessDenied";
-    });
 
+
+
+
+builder.Services.AddIdentity<User, IdentityRole>()  // User is your custom user class
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/User/Login";  // Ensure that this points to your login page
+    options.AccessDeniedPath = "/User/AccessDenied";  // Optionally, add an access denied page
+    options.Cookie.Name = "Identity.Application";  // This sets the correct cookie scheme
+});
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequiredLength = 6; // Minimum password length
+});
+
+builder.Logging.AddFilter("Microsoft.AspNetCore.Identity", LogLevel.Debug);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -29,7 +46,22 @@ var app = builder.Build();
 //     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 //     app.UseHsts();
 // }
+// 5. Seed the Admin User and Role
 
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        await Admin.Initialize(services); 
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred during admin seeding.");
+    }
+}
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
