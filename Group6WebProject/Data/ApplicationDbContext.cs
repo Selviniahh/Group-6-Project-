@@ -1,3 +1,4 @@
+using Group6WebProject.Controllers;
 using Group6WebProject.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -8,6 +9,7 @@ public class ApplicationDbContext : DbContext
 {
     public DbSet<MemberPreferences> MemberPreferences { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<Profile> Profiles { get; set; }
 
     //Ignore pending model changes warning. For now this is commented, if during migration an error is occured, consider to uncomment this overriden method. 
     // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -35,7 +37,7 @@ public class ApplicationDbContext : DbContext
                 UserID = 1,
                 Name = "Default User",
                 Email = "DefaultUser@example.com",
-                PasswordHash = "123",
+                PasswordHash = UserController.HashPassword("123"), 
                 Status = EnrollmentStatus.EnrollmentConfirmed
             });
     }

@@ -106,7 +106,7 @@ public class UserController : Controller
         return View("EmailConfirmed");
     }
 
-    private string HashPassword(string password)
+    public static string HashPassword(string password)
     {
         var sha256 = SHA256.Create();
         // Convert the password string to a byte array
@@ -189,5 +189,72 @@ public class UserController : Controller
         //Just simply sign out from cookie authentication.
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("Index", "Home");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Profile()
+    {
+        int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+        
+        //Check first if profile found 
+        var existingProfile = await _dbContext.Profiles.FirstOrDefaultAsync(u => u.UserId == userId);
+        if (existingProfile != null)
+        {
+            return View(existingProfile);
+        }
+        
+        //Else just create a new profile
+        var model = new Profile
+        {
+            Name = User.FindFirst(ClaimTypes.Name)?.Value,
+            Email = User.FindFirst(ClaimTypes.Email)?.Value,
+            UserId = userId,
+            Biography = "Please describe briefly about yourself.",
+            LastLogin = DateTime.Now,
+            ReceivePromotionalEmails = false,
+            Gender = Gender.NotSelected,
+            Country = string.Empty,
+            FavouriteVideoGame = string.Empty,
+            ContactNumber = string.Empty,
+            DateOfBirth = DateTime.Now
+        };
+        return View(model);
+    }
+    
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SaveProfile(Profile model)
+    {
+        if (ModelState.IsValid)
+        {
+            var existingProfile = _dbContext.Profiles.FirstOrDefault(p => p.Email == model.Email);
+            if (existingProfile != null)
+            {
+                // Update existing profile
+                existingProfile.ProfilePicture = model.ProfilePicture;
+                existingProfile.FavouriteVideoGame = model.FavouriteVideoGame;
+                existingProfile.Biography = model.Biography;
+                existingProfile.DateOfBirth = model.DateOfBirth;
+                existingProfile.Gender = model.Gender;
+                existingProfile.Country = model.Country;
+                existingProfile.ContactNumber = model.ContactNumber;
+                existingProfile.ReceivePromotionalEmails = model.ReceivePromotionalEmails;
+                existingProfile.LastLogin = DateTime.Now;
+            }
+            else
+            {
+                // Create new profile
+                model.LastLogin = DateTime.Now;
+                _dbContext.Profiles.Add(model);
+            }
+
+            await _dbContext.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Your profile has been saved successfully.";
+            return RedirectToAction("Profile");
+        }
+
+        // If validation fails, return the view with the current model to display errors
+        return View("Profile", model);
     }
 }

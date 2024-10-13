@@ -23,7 +23,6 @@ public class User
 
     [Required] public EnrollmentStatus Status { get; set; } = EnrollmentStatus.ConfirmationMessageNotSent;
 
-
     [Required(ErrorMessage = "Password is required.")]
     public string PasswordHash { get; set; }
 }
