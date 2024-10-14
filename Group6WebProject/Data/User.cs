@@ -18,9 +18,9 @@ public class User : IdentityUser
     [Required(ErrorMessage = "Student name is required.")]
     public string Name { get; set; }
 
-    [Required(ErrorMessage = "Email address is required.")]
-    [EmailAddress(ErrorMessage = "Invalid Email Address")]
-    public string Email { get; set; }
+    //[Required(ErrorMessage = "Email address is required.")]
+    //[EmailAddress(ErrorMessage = "Invalid Email Address")]
+    //public string Email { get; set; }
 
     [Required] public EnrollmentStatus Status { get; set; } = EnrollmentStatus.ConfirmationMessageNotSent;
 

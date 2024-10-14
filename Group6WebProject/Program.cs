@@ -1,81 +1,85 @@
 using Microsoft.EntityFrameworkCore;
 using Group6WebProject.Data;
 using Group6WebProject.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-//Setup the db 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddTransient<IEmailService, EmailService>();
-
-//Set the default authentication scheme to cookies
-
-
-
-
-builder.Services.AddIdentity<User, IdentityRole>()  // User is your custom user class
+// Configure Identity with custom options (like password policies)
+builder.Services.AddIdentity<User, IdentityRole>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequiredLength = 8;
+})
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+// Setup the db
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Add custom services like EmailService
+builder.Services.AddTransient<IEmailService, EmailService>();
+
+// Configure cookie authentication
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/User/Login";  // Ensure that this points to your login page
-    options.AccessDeniedPath = "/User/AccessDenied";  // Optionally, add an access denied page
-    options.Cookie.Name = "Identity.Application";  // This sets the correct cookie scheme
-});
-builder.Services.Configure<IdentityOptions>(options =>
-{
-    options.Password.RequireDigit = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequiredLength = 6; // Minimum password length
+    options.LoginPath = "/User/Login"; // Redirect to your login page
+    options.AccessDeniedPath = "/User/AccessDenied"; // Optionally configure an access denied page
 });
 
-builder.Logging.AddFilter("Microsoft.AspNetCore.Identity", LogLevel.Debug);
+// Build the app
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-// if (!app.Environment.IsDevelopment())
-// {
-//     app.UseExceptionHandler("/Home/Error");
-//     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-//     app.UseHsts();
-// }
-// 5. Seed the Admin User and Role
-
-
+// Ensure the admin user and role are seeded
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    var userManager = services.GetRequiredService<UserManager<User>>();
+
     try
     {
-        await Admin.Initialize(services); 
+        await Admin.CreateAdminUser(services); // This ensures the admin user and role are created
+
+        // Normalize emails for all users
+        var users = userManager.Users.ToList();
+        foreach (var user in users)
+        {
+            if (string.IsNullOrEmpty(user.NormalizedEmail))
+            {
+                user.NormalizedEmail = userManager.NormalizeEmail(user.Email);
+                await userManager.UpdateAsync(user);
+            }
+        }
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred during admin seeding.");
+        logger.LogError(ex, "An error occurred while seeding the admin user.");
     }
 }
+
+// Configure the HTTP request pipeline
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseAuthentication();  // Ensure authentication is enabled
+app.UseAuthorization();   // Ensure authorization is enabled
 
 app.MapControllerRoute(
-    "default",
-    "{controller=Home}/{action=Index}/{id?}"); //I am changing this already existing line
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
-
 //This is extra two line that I am changing 
 //Chanelle's first commit
 //KP

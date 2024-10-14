@@ -16,21 +16,29 @@ public class UserController : Controller
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly IEmailService _emailService;
+    private readonly UserManager<User> _userManager;  
+    private readonly SignInManager<User> _signInManager;  
 
-    public UserController(ApplicationDbContext dbContext, IEmailService emailService)
+    public UserController(
+        ApplicationDbContext dbContext, 
+        IEmailService emailService, 
+        UserManager<User> userManager,  
+        SignInManager<User> signInManager)  
     {
         _dbContext = dbContext;
         _emailService = emailService;
+        _userManager = userManager;  
+        _signInManager = signInManager;  
     }
 
-    //This can only can be invoked from main page 
+
     [HttpGet]
     public IActionResult Register()
     {
         return View();
     }
 
-    //This can only can be invoked from main page 
+
     [HttpGet]
     public IActionResult Login()
     {
@@ -42,7 +50,7 @@ public class UserController : Controller
     {
         if (ModelState.IsValid)
         {
-            // Check if the email is already registered. FirstOrDefaultAsync is like foreach, when an instance is found the function returns. It's async because I/O operations can block thread.  
+            // Check if the email is already registered. 
             var existingUser = await _dbContext.Users
                 .FirstOrDefaultAsync(u => u.Email == model.Email);
             if (existingUser != null)
@@ -52,14 +60,14 @@ public class UserController : Controller
             }
 
             // Hash the password
-            var passwordHash = HashPassword(model.Password);
+            //var passwordHash = HashPassword(model.Password);
 
             // Create the user entity
             var user = new User
             {
                 Name = model.Name,
                 Email = model.Email,
-                PasswordHash = passwordHash,
+                //PasswordHash = passwordHash,
                 Status = EnrollmentStatus.ConfirmationMessageNotSent
             };
 
@@ -120,68 +128,69 @@ public class UserController : Controller
         return builder.ToString();
     }
 
-
-    [HttpPost]
-    public async Task<IActionResult> Login(LoginViewModel model)
+[HttpPost]
+public async Task<IActionResult> Login(LoginViewModel model)
+{
+    if (ModelState.IsValid)
     {
-        if (ModelState.IsValid)
+        // Find the user by email
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+
+        if (user == null)
         {
-            // Find the user by email
-            var user = await _dbContext.Users
-                .FirstOrDefaultAsync(u => u.Email == model.Email);
+            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            return View(model);
+        }
 
-            if (user == null)
-            {
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                return View(model);
-            }
+        if (user.Status != EnrollmentStatus.EnrollmentConfirmed)
+        {
+            ModelState.AddModelError(string.Empty, "Email not confirmed.");
+            return View(model);
+        }
 
-            if (user.Status != EnrollmentStatus.EnrollmentConfirmed)
-            {
-                ModelState.AddModelError(string.Empty, "Email not confirmed.");
-                return View(model);
-            }
+        // Sign in the user
+        var result = await _signInManager.PasswordSignInAsync(user, model.Password, isPersistent: true, lockoutOnFailure: false);
 
-            // Verify the password
-            //var passwordHash = HashPassword(model.Password);
-          //  if (user.PasswordHash != passwordHash)
-            {
-               // ModelState.AddModelError(string.Empty, "Invalid login attempt. Wrong password");
-               // return View(model);
-            }
+        if (result.Succeeded)
+        {
+            // Fetch roles assigned to the user
+            var roles = await _userManager.GetRolesAsync(user);
 
-            // Everything cheks out now Sign in the user. 
-            //Claim is used for authentication about a user. 
+            // Attach roles as claims
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.UserID.ToString()),
-                new(ClaimTypes.Name, user.Name),
+                new(ClaimTypes.Name, user.UserName),
                 new(ClaimTypes.Email, user.Email)
             };
 
-            //Use cookie authentication to sign in the user
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            foreach (var role in roles)
+            {
+                //add roles
+                claims.Add(new Claim(ClaimTypes.Role, role)); 
+            }
 
+            var claimsIdentity = new ClaimsIdentity(claims, IdentityConstants.ApplicationScheme);
             var authProperties = new AuthenticationProperties
             {
-                // Allow refreshing the authentication session
-                AllowRefresh = true,
-
-                // Make the cookie persistent 
                 IsPersistent = true,
-
-                // Expires after 1 hour
                 ExpiresUtc = DateTimeOffset.UtcNow.AddHours(1)
             };
 
-            //Sign in the user with all the generated claims and identities. 
+            // Sign in with the new claims
             await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
-            // Redirect to the home page or wherever you want
+
             return RedirectToAction("Index", "Home");
         }
-
-        return View(model);
+        else
+        {
+            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+        }
     }
+
+    return View(model);
+}
+
 
     [HttpPost]
     public async Task<IActionResult> Logout()
@@ -195,21 +204,29 @@ public class UserController : Controller
     [HttpGet]
     public async Task<IActionResult> Profile()
     {
-        int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-        
-        //Check first if profile found 
+        // Retrieve the UserID from the claims as an int
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!int.TryParse(userIdClaim, out int userId))
+        {
+            // Handle the case where UserID is not a valid integer
+            return BadRequest("Invalid UserID format.");
+        }
+
+        // Check if the profile exists for the given UserID
         var existingProfile = await _dbContext.Profiles.FirstOrDefaultAsync(u => u.UserId == userId);
+    
         if (existingProfile != null)
         {
             return View(existingProfile);
         }
-        
-        //Else just create a new profile
+
+        // Create a new profile if one doesn't exist
         var model = new Profile
         {
+            UserId = userId,
             Name = User.FindFirst(ClaimTypes.Name)?.Value,
             Email = User.FindFirst(ClaimTypes.Email)?.Value,
-            UserId = userId,
             Biography = "Please describe briefly about yourself.",
             LastLogin = DateTime.Now,
             ReceivePromotionalEmails = false,
@@ -219,43 +236,51 @@ public class UserController : Controller
             ContactNumber = string.Empty,
             DateOfBirth = DateTime.Now
         };
+
         return View(model);
     }
     
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> SaveProfile(Profile model)
+private static readonly object _lock = new object();
+
+public async Task<IActionResult> SaveProfile(Profile model)
+{
+    // Check if the country is valid (ensure it's not empty or null)
+    if (string.IsNullOrWhiteSpace(model.Country))
     {
-        if (ModelState.IsValid)
-        {
-            var existingProfile = _dbContext.Profiles.FirstOrDefault(p => p.Email == model.Email);
-            if (existingProfile != null)
-            {
-                // Update existing profile
-                existingProfile.ProfilePicture = model.ProfilePicture;
-                existingProfile.FavouriteVideoGame = model.FavouriteVideoGame;
-                existingProfile.Biography = model.Biography;
-                existingProfile.DateOfBirth = model.DateOfBirth;
-                existingProfile.Gender = model.Gender;
-                existingProfile.Country = model.Country;
-                existingProfile.ContactNumber = model.ContactNumber;
-                existingProfile.ReceivePromotionalEmails = model.ReceivePromotionalEmails;
-                existingProfile.LastLogin = DateTime.Now;
-            }
-            else
-            {
-                // Create new profile
-                model.LastLogin = DateTime.Now;
-                _dbContext.Profiles.Add(model);
-            }
-
-            await _dbContext.SaveChangesAsync();
-
-            TempData["SuccessMessage"] = "Your profile has been saved successfully.";
-            return RedirectToAction("Profile");
-        }
-
-        // If validation fails, return the view with the current model to display errors
-        return View("Profile", model);
+        TempData["ErrorMessage"] = "Country is required. Please select a valid country.";
+        return View("Profile", model);  // Return to the "Profile" view with the model so the user can correct it
     }
+
+    Profile existingProfile;
+
+    lock (_lock)
+    {
+        existingProfile = _dbContext.Profiles.FirstOrDefault(p => p.Email == model.Email);
+        if (existingProfile != null)
+        {
+            // Update existing profile
+            existingProfile.ProfilePicture = model.ProfilePicture;
+            existingProfile.FavouriteVideoGame = model.FavouriteVideoGame;
+            existingProfile.Biography = model.Biography;
+            existingProfile.DateOfBirth = model.DateOfBirth;
+            existingProfile.Gender = model.Gender;
+            existingProfile.Country = model.Country;
+            existingProfile.ContactNumber = model.ContactNumber;
+            existingProfile.ReceivePromotionalEmails = model.ReceivePromotionalEmails;
+            existingProfile.LastLogin = DateTime.Now;
+        }
+        else
+        {
+            // Create new profile
+            model.LastLogin = DateTime.Now;
+            _dbContext.Profiles.Add(model);
+        }
+    }
+
+    // Save changes asynchronously
+    await _dbContext.SaveChangesAsync();
+
+    TempData["SuccessMessage"] = "Your profile has been saved successfully.";
+    return RedirectToAction("Profile");  // Redirect back to the "Profile" action after a successful save
+}
 }

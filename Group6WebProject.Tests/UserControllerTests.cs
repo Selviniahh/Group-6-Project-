@@ -25,25 +25,37 @@ namespace Group6WebProject.Tests
         private readonly UserController _controller;
         private readonly ApplicationDbContext _context;
         private readonly Mock<IEmailService> _emailServiceMock;
+        private readonly Mock<UserManager<User>> _userManagerMock;
+        private readonly Mock<SignInManager<User>> _signInManagerMock;
 
-        //Everything inside this constructor will be used to initialize necessary objects to simulate a working environment for the tests
-        //Mock type used to simulate the behavior of a real object. 
         public UserControllerTests()
         {
             // Set up in-memory database
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString()) // Make Unique DB per test
-                .Options; //This is necessary to convert DbContextOptionsBuilder to DbContextOptions 
+                .Options;
 
-            _context = new ApplicationDbContext(options); //This is the context that will be used in the tests. Just same as ApplicationDbContext in original project. 
+            _context = new ApplicationDbContext(options); 
 
-            // Mock IEmailService. This is the only simple mocking requirement thankfully. 
+            // Mock services
             _emailServiceMock = new Mock<IEmailService>();
 
-            // Mock IUrlHelper got unsuccessful because of the complexity of the method.
+            // Mock UserManager
+            var store = new Mock<IUserStore<User>>();
+            _userManagerMock = new Mock<UserManager<User>>(store.Object, null, null, null, null, null, null, null, null);
 
-            // Initialize the controller. It will only make tests for the user that has id 0 
-            _controller = new UserController(_context, _emailServiceMock.Object)
+            // Mock SignInManager
+            var contextAccessor = new Mock<IHttpContextAccessor>();
+            var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<User>>();
+            _signInManagerMock = new Mock<SignInManager<User>>(
+                _userManagerMock.Object,
+                contextAccessor.Object,
+                userPrincipalFactory.Object,
+                null, null, null, null
+            );
+
+            // Initialize the controller with the mocked services
+            _controller = new UserController(_context, _emailServiceMock.Object, _userManagerMock.Object, _signInManagerMock.Object)
             {
                 Url = GetMockUrlHelper("https://localhost/User/ConfirmEmail?userId=0"),
                 ControllerContext = new ControllerContext()
@@ -52,11 +64,11 @@ namespace Group6WebProject.Tests
                 }
             };
 
-            // Set HttpContext.Request.Scheme just like in program.cs
+            // Set HttpContext.Request.Scheme just like in the actual environment
             _controller.ControllerContext.HttpContext.Request.Scheme = "https";
         }
 
-        //It.Is or It.IsAny is used to check if the method is called with the correct parameters. 
+        // Create a mock IUrlHelper
         private static IUrlHelper GetMockUrlHelper(string returnValue)
         {
             var urlHelperMock = new Mock<IUrlHelper>();
@@ -64,10 +76,9 @@ namespace Group6WebProject.Tests
             return urlHelperMock.Object;
         }
 
-
+        // Dispose method for cleaning up after each test
         public void Dispose()
         {
-            // Clean up the in-memory database after each test
             _context.Database.EnsureDeleted();
             _context.Dispose();
         }
@@ -155,20 +166,19 @@ namespace Group6WebProject.Tests
             var error = _controller.ModelState[string.Empty].Errors.First();
             Assert.Equal("An account with this email already exists.", error.ErrorMessage);
         }
-
         [Fact]
         public async Task IncorrectPasswordShouldReturnError()
         {
             // Arrange
-            var password = "Password123!";
             var user = new User
             {
                 UserID = 1,
                 Name = "Test User",
                 Email = "test@example.com",
-                PasswordHash = UserController.HashPassword(password),
                 Status = EnrollmentStatus.EnrollmentConfirmed
             };
+
+            // Add the user to the in-memory database
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
@@ -178,9 +188,31 @@ namespace Group6WebProject.Tests
                 Password = "WrongPassword!"
             };
 
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _controller.Login(model));
-        }
+            // Mock UserManager's FindByEmailAsync method to return the user
+            _userManagerMock
+                .Setup(um => um.FindByEmailAsync(user.Email))
+                .ReturnsAsync(user);
 
+            // Mock SignInManager's PasswordSignInAsync method to simulate incorrect password
+            _signInManagerMock
+                .Setup(sm => sm.PasswordSignInAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
+                .ReturnsAsync(Microsoft.AspNetCore.Identity.SignInResult.Failed);
+
+            // Initialize HttpContext for the controller
+            var httpContext = new DefaultHttpContext();
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            };
+
+            // Act
+            var result = await _controller.Login(model);
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.True(_controller.ModelState.ContainsKey(string.Empty)); // Check if ModelState has errors
+            Assert.Equal("Invalid login attempt.", _controller.ModelState[string.Empty].Errors.First().ErrorMessage);
+        }
         [Fact]
         public async Task UnConfirmedEmailShouldReturnError()
         {

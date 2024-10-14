@@ -13,6 +13,12 @@ public class AdminController : Controller
 
     public IActionResult Index()
     {
+        // Log claims for debugging
+        foreach (var claim in User.Claims)
+        {
+            Console.WriteLine($"{claim.Type}: {claim.Value}");
+        }
+
         return View();
     }
 
