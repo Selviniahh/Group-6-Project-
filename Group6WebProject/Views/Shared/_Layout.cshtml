@@ -29,9 +29,10 @@
                         <a class="nav-link text-dark" asp-area="" asp-controller="Preferences" asp-action="Index">Preferences</a>
                     </li>
                     <li class="nav-item">
-                        @if (User.IsInRole("Admin"))
+                        @if (User.Identity.IsAuthenticated &&
+                             bool.TryParse(User.FindFirst("IsAdmin")?.Value, out bool isAdmin) && isAdmin)
                         {
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Admin Panel</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Admin Panel</a>
                         }
                     </li>
                 </ul>
@@ -44,8 +45,7 @@
                         <button type="submit" class="btn btn-link">Logout</button>
                     </form>
 
-                <a asp-action="Profile" asp-controller="User" class="btn btn-link">Profile</a>
-                    
+                    <a asp-action="Profile" asp-controller="User" class="btn btn-link">Profile</a>
                 }
                 else
                 {

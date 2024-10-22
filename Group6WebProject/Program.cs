@@ -1,25 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using Group6WebProject.Data;
 using Group6WebProject.Services;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Configure Identity with custom options (like password policies)
-builder.Services.AddIdentity<User, IdentityRole>(options =>
-{
-    options.Password.RequireDigit = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequireUppercase = true;
-    options.Password.RequireNonAlphanumeric = true;
-    options.Password.RequiredLength = 8;
-})
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/User/Login"; // Redirect to your login page
+        options.AccessDeniedPath = "/User/AccessDenied"; // Optionally configure an access denied page
+    });
 
 // Setup the db
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -37,34 +31,6 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 // Build the app
 var app = builder.Build();
-
-// Ensure the admin user and role are seeded
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var userManager = services.GetRequiredService<UserManager<User>>();
-
-    try
-    {
-        await Admin.CreateAdminUser(services); // This ensures the admin user and role are created
-
-        // Normalize emails for all users
-        var users = userManager.Users.ToList();
-        foreach (var user in users)
-        {
-            if (string.IsNullOrEmpty(user.NormalizedEmail))
-            {
-                user.NormalizedEmail = userManager.NormalizeEmail(user.Email);
-                await userManager.UpdateAsync(user);
-            }
-        }
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the admin user.");
-    }
-}
 
 // Configure the HTTP request pipeline
 app.UseHttpsRedirection();
