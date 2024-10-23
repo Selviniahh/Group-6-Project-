@@ -6,8 +6,10 @@ using Group6WebProject.Models;
 using Group6WebProject.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 
 namespace Group6WebProject.Controllers;
@@ -25,6 +27,48 @@ public class UserController : Controller
         _reCaptchaService = reCaptchaService;
     }
 
+    [HttpGet]
+    [Authorize]
+    public IActionResult ChangePassword()
+    {
+        return View();
+    }
+    
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+        
+        // Retrieve the UserID from the claims
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        //out simply means pass by ref like "int& userId" in C++ 
+        if (!int.TryParse(userIdClaim, out int userId))
+        {
+            return BadRequest("Invalid UserID format.");
+        }
+
+        var user = await _dbContext.Users.FindAsync(userId);
+        if (user == null) return NotFound("User not found.");
+        
+        //Verify the fcurrent password 
+        var currentPasswordHash = HashPassword(model.CurrentPassword);
+        if (user.PasswordHash != currentPasswordHash)
+        {
+            ModelState.AddModelError(string.Empty, "Current password is incorrect");
+            return View(model);
+        }
+
+        user.PasswordHash = HashPassword(model.NewPassword);
+        await _dbContext.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Your password has been changed successfully";
+        return RedirectToAction("Profile");
+    }
 
     [HttpGet]
     public IActionResult Register()
@@ -150,8 +194,7 @@ public class UserController : Controller
             //If user is locked out and lockout end time is in the future, give error 
             if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTime.Now)
             {
-                var lockoutTime = user.LockoutEnd.Value.ToLocalTime();
-                ModelState.AddModelError(string.Empty, $"Account is locked. Try again at {lockoutTime}.");
+                ModelState.AddModelError(string.Empty, $"Account is locked. Try again at {user.LockoutEnd.Value}.");
                 return View(model);
             }
 
@@ -165,7 +208,7 @@ public class UserController : Controller
                 {
                     //Lock out the log in attempt
                     user.LockOutCounter++;
-                    user.LockoutEnd = DateTime.UtcNow.AddMinutes(Data.User.LockOutTimer * user.LockOutCounter);
+                    user.LockoutEnd = DateTime.Now.AddMinutes(Data.User.LockOutTimer * user.LockOutCounter);
                     ModelState.AddModelError(string.Empty, "Account locked due to multiple failed login attempts. Try again later.");
                 }
                 else
