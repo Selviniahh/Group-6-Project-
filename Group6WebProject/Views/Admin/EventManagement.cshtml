@@ -9,8 +9,13 @@
 <form method="post" action="/Admin/AddEvent">
     <label for="Name">Event Name</label>
     <input type="text" id="Name" name="Name" required/>
-    <label for="Date">Date</label>
+    
+    <label for="Description">Description</label>
+    <input type="text" id="Description" name="Description" required/>
+    
+    <label for="Date">EventDate</label>
     <input type="date" id="Date" name="Date" required/>
+    
     <button type="submit">Add Event</button>
 </form>
 
@@ -19,7 +24,8 @@
     <tr>
         <th>ID</th>
         <th>Name</th>
-        <th>Date</th>
+        <th>Description</th>
+        <th>EventDate</th>
     </tr>
     </thead>
     <tbody>
@@ -28,7 +34,8 @@
         <tr>
             <td>@eventItem.Id</td>
             <td>@eventItem.Name</td>
-            <td>@eventItem.Date.ToString("yyyy-MM-dd")</td>
+            <td>@eventItem.Description</td>
+            <td>@eventItem.EventDate.ToString("yyyy-MM-dd")</td>
         </tr>
     }
     </tbody>

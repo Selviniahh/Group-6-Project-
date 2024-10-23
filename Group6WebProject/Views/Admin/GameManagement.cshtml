@@ -9,8 +9,22 @@
 <form method="post" action="/Admin/AddGame">
     <label for="Title">Game Title</label>
     <input type="text" id="Title" name="Title" required/>
+    
+    <label for="Description">Description</label>
+    <input type="text" id="Description" name="Description" required/>
+    
+    <label for="Date">ReleaseDate</label>
+    <input type="date" id="Date" name="Date" required/>
+    
     <label for="Genre">Genre</label>
     <input type="text" id="Genre" name="Genre" required/>
+    
+    <label for="Price">Price</label>
+    <input type="text" id="Price" name="Price" required/>
+    
+    <label for="Platform">Platform</label>
+    <input type="text" id="Platform" name="Platform" required/>
+    
     <button type="submit">Add Game</button>
 </form>
 
@@ -19,7 +33,11 @@
     <tr>
         <th>ID</th>
         <th>Title</th>
+        <th>Description</th>
+        <th>ReleaseDate</th>
         <th>Genre</th>
+        <th>Price</th>
+        <th>Platform</th>
     </tr>
     </thead>
     <tbody>
@@ -28,7 +46,11 @@
         <tr>
             <td>@game.Id</td>
             <td>@game.Title</td>
+            <td>@game.Description</td>
+            <td>@game.ReleaseDate.ToString("yyyy-MM-dd")</td>
             <td>@game.Genre</td>
+            <td>@game.Price</td>
+            <td>>@game.Platform</td>
         </tr>
     }
     </tbody>
