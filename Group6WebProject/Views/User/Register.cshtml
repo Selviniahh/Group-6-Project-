@@ -1,39 +1,68 @@
 @model Group6WebProject.Models.RegisterViewModel
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 
 @{
-    ViewData["Title"] = "Register a user";
+ViewData["Title"] = "Register a user";
 }
 
 <h2>Register to website</h2>
 
-<form asp-action="Register" method="post">
+<!-- Include the reCAPTCHA API script -->
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
-    @* dipslay all kinds of error *@
+<form asp-action="Register" method="post">
+    @Html.AntiForgeryToken()
+
+    <!-- Display validation errors -->
     <div asp-validation-summary="All" class="text-danger"></div>
 
+    <!-- Name -->
     <div class="form-group">
         <label asp-for="Name"></label>
         <input asp-for="Name" class="form-control"/>
         <span asp-validation-for="Name" class="text-danger"></span>
     </div>
 
+    <!-- Email -->
     <div class="form-group">
         <label asp-for="Email"></label>
         <input asp-for="Email" class="form-control"/>
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
 
+    <!-- Password -->
     <div class="form-group">
         <label asp-for="Password"></label>
-        <input asp-for="Password" class="form-control"/>
+        <input asp-for="Password" class="form-control" type="password"/>
         <span asp-validation-for="Password" class="text-danger"></span>
     </div>
 
+    <!-- Confirm Password -->
     <div class="form-group">
         <label asp-for="ConfirmPassword"></label>
-        <input asp-for="ConfirmPassword" class="form-control"/>
+        <input asp-for="ConfirmPassword" class="form-control" type="password"/>
         <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
     </div>
 
+    <!-- reCAPTCHA widget with callback -->
+    <div class="form-group">
+        <div class="g-recaptcha"
+             data-sitekey="@Configuration["ReCaptcha:SiteKey"]"
+             data-callback="onReCaptchaSuccess"></div>
+        <span asp-validation-for="ReCaptchaToken" class="text-danger"></span>
+    </div>
+
+    <!-- Hidden input to capture reCAPTCHA response -->
+    <input type="hidden" asp-for="ReCaptchaToken" id="ReCaptchaToken" />
+
+    <!-- Submit Button -->
     <button type="submit" class="btn btn-primary">Register</button>
 </form>
+
+<script>
+    function onReCaptchaSuccess(token) {
+        console.log('reCAPTCHA completed. Token:', token);
+        document.getElementById('ReCaptchaToken').value = token;
+    }
+</script>
+

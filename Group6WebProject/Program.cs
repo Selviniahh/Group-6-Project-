@@ -15,6 +15,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/User/AccessDenied"; // Optionally configure an access denied page
     });
 
+builder.Services.AddTransient<IReCaptchaService, ReCaptchaService>();
+builder.Services.AddHttpClient();
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 // Setup the db
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));

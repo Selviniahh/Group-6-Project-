@@ -20,6 +20,7 @@ namespace Group6WebProject.Tests
         private readonly Mock<IEmailService> _emailServiceMock;
         private readonly Mock<UserManager<User>> _userManagerMock;
         private readonly Mock<SignInManager<User>> _signInManagerMock;
+        private readonly IReCaptchaService _reCaptchaService;
 
         public UserControllerTests()
         {
@@ -48,7 +49,7 @@ namespace Group6WebProject.Tests
             );
 
             // Initialize the controller with the mocked services
-            _controller = new UserController(_context, _emailServiceMock.Object)
+            _controller = new UserController(_context, _emailServiceMock.Object, _reCaptchaService)
             {
                 Url = GetMockUrlHelper("https://localhost/User/ConfirmEmail?userId=0"),
                 ControllerContext = new ControllerContext()
