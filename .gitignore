@@ -17,3 +17,4 @@ node_modules/
 .vs/
 *.vcxproj.user
 *.vcxproj.filters
+.env

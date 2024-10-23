@@ -1,9 +1,14 @@
+using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using Group6WebProject.Data;
 using Group6WebProject.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//Load .env file
+Env.Load();
+builder.Configuration.AddEnvironmentVariables();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -51,7 +56,3 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
-//This is extra two line that I am changing 
-//Chanelle's first commit
-//KP
-//Vidhi's Commit
