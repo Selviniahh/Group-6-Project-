@@ -30,4 +30,10 @@ public class User
 
     // New property to indicate admin status
     public bool IsAdmin { get; set; } = false;
+    
+    public int FailedLoginAttempts { get; set; } = 0;
+    public DateTime? LockoutEnd { get; set; }
+
+    public const int LockOutTimer = 15;
+    public int LockOutCounter = 0;
 }

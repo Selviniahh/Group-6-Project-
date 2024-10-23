@@ -7,6 +7,9 @@
 <h2>Login</h2>
 
 <form asp-action="Login" method="post">
+    @Html.AntiForgeryToken()
+    
+    @* display all the errors *@
     <div asp-validation-summary="All" class="text-danger"></div>
 
     <div class="form-group">
@@ -23,3 +26,8 @@
 
     <button type="submit" class="btn btn-primary">Login</button>
 </form>
+
+@* add client side validation scripts *@
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

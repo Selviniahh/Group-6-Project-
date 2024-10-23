@@ -133,15 +133,25 @@ public class UserController : Controller
             // Find the user by email
             var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
 
+            //If the user not found give error again
             if (user == null)
             {
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                ModelState.AddModelError(string.Empty, "Invalid login attempt. Email does not exist");
                 return View(model);
             }
 
+            //If email not confirmed, give error
             if (user.Status != EnrollmentStatus.EnrollmentConfirmed)
             {
                 ModelState.AddModelError(string.Empty, "Email not confirmed.");
+                return View(model);
+            }
+
+            //If user is locked out and lockout end time is in the future, give error 
+            if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTime.Now)
+            {
+                var lockoutTime = user.LockoutEnd.Value.ToLocalTime();
+                ModelState.AddModelError(string.Empty, $"Account is locked. Try again at {lockoutTime}.");
                 return View(model);
             }
 
@@ -149,9 +159,29 @@ public class UserController : Controller
             var passwordHash = HashPassword(model.Password);
             if (user.PasswordHash != passwordHash)
             {
-                ModelState.AddModelError(string.Empty, "Invalid login attempt. Wrong password");
+                //If password is incorrect, increment failed login attempts once
+                user.FailedLoginAttempts += 1;
+                if (user.FailedLoginAttempts >= 3)
+                {
+                    //Lock out the log in attempt
+                    user.LockOutCounter++;
+                    user.LockoutEnd = DateTime.UtcNow.AddMinutes(Data.User.LockOutTimer * user.LockOutCounter);
+                    ModelState.AddModelError(string.Empty, "Account locked due to multiple failed login attempts. Try again later.");
+                }
+                else
+                {
+                    var attemptsLeft = 3 - user.FailedLoginAttempts;
+                    ModelState.AddModelError(string.Empty, $"Invalid login attempt. You have {attemptsLeft} more attempt(s) before your account is locked.");
+                }
+                
+                await _dbContext.SaveChangesAsync();
                 return View(model);
             }
+            
+            //Since password is correct, reset failed login attempts
+            user.FailedLoginAttempts = 0;
+            user.LockoutEnd = null;
+            await _dbContext.SaveChangesAsync();
 
             // Create user claims
             var claims = new List<Claim>
@@ -178,7 +208,7 @@ public class UserController : Controller
                 new ClaimsPrincipal(claimsIdentity),
                 authProperties);
 
-            // Redirect to the home page or wherever you want
+            // Redirect to the home page
             return RedirectToAction("Index", "Home");
         }
 
