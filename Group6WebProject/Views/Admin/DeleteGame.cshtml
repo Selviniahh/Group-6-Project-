@@ -1,0 +1,17 @@
+﻿@model Group6WebProject.Models.Game
+
+<h2>Delete Game</h2>
+
+<div>
+    <h4>Are you sure you want to delete this game?</h4>
+    <h5>@Model.Title</h5>
+    <form asp-action="DeleteGameConfirmed" method="post">
+        <input type="hidden" asp-for="Id" />
+        <div>
+            <input type="submit" value="Delete" />
+        </div>
+        <div>
+            <a asp-action="GameManagement">Cancel</a>
+        </div>
+    </form>
+</div>
