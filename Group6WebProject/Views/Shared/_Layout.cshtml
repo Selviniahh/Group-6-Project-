@@ -29,7 +29,7 @@
                         @if (User.Identity.IsAuthenticated &&
                              bool.TryParse(User.FindFirst("IsAdmin")?.Value, out bool isAdmin) && isAdmin)
                         {
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Admin Panel</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Admin </a>
                         }
                     </li>
                 </ul>

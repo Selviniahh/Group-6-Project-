@@ -1,34 +1,46 @@
-﻿
-@model List<Game>
+﻿@model List<Game>
 @{
 ViewBag.Title = "Game Management";
 Layout = "_Layout";
 }
 
 <h2>Game Management</h2>
-<form method="post" action="/Admin/AddGame">
-    <label for="Title">Game Title</label>
-    <input type="text" id="Title" name="Title" required/>
 
-    <label for="Description">Description</label>
-    <input type="text" id="Description" name="Description" required/>
+<form method="post" action="/Admin/AddGame" style="max-width: 600px; margin-bottom: 20px;">
+    <div class="form-group">
+        <label for="Title">Game Title</label>
+        <input type="text" id="Title" name="Title" required class="form-control" />
+    </div>
 
-    <label for="ReleaseDate">Release Date</label>
-    <input type="date" id="ReleaseDate" name="ReleaseDate" required/>
+    <div class="form-group">
+        <label for="Description">Description</label>
+        <textarea id="Description" name="Description" required class="form-control"></textarea>
+    </div>
 
-    <label for="Genre">Genre</label>
-    <input type="text" id="Genre" name="Genre" required/>
+    <div class="form-group">
+        <label for="ReleaseDate">Release Date</label>
+        <input type="date" id="ReleaseDate" name="ReleaseDate" required class="form-control" />
+    </div>
 
-    <label for="Price">Price</label>
-    <input type="text" id="Price" name="Price" required/>
+    <div class="form-group">
+        <label for="Genre">Genre</label>
+        <input type="text" id="Genre" name="Genre" required class="form-control" />
+    </div>
 
-    <label for="Platform">Platform</label>
-    <input type="text" id="Platform" name="Platform" required/>
+    <div class="form-group">
+        <label for="Price">Price</label>
+        <input type="text" id="Price" name="Price" required class="form-control" />
+    </div>
 
-    <button type="submit">Add Game</button>
+    <div class="form-group">
+        <label for="Platform">Platform</label>
+        <input type="text" id="Platform" name="Platform" required class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Game</button>
 </form>
 
-<table border="1">
+<table border="1" style="width: 100%; border-collapse: collapse;">
     <thead>
     <tr>
         <th>ID</th>
@@ -53,12 +65,33 @@ Layout = "_Layout";
         <td>@game.Price</td>
         <td>@game.Platform</td>
         <td>
-            <a asp-action="EditGame" asp-route-id="@game.Id">Edit</a>
-            |
+            <a asp-action="EditGame" asp-route-id="@game.Id">Edit</a> |
             <a asp-action="DeleteGame" asp-route-id="@game.Id">Delete</a>
-
         </td>
     </tr>
     }
     </tbody>
 </table>
+
+<style>
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    .btn {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        color: white;
+        background-color: #007bff;
+        cursor: pointer;
+    }
+    .btn:hover {
+        background-color: #0056b3;
+    }
+</style>
