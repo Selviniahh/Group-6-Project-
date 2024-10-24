@@ -1,26 +1,26 @@
 ﻿@model Group6WebProject.Models.Game
 
 @{
-    ViewBag.Title = "Confirm Delete Game";
-    Layout = "_Layout";
+ViewBag.Title = "Confirm Delete Game";
+Layout = "_Layout";
 }
 
 <h2>Delete Game</h2>
 
-<div>
+<div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
     <h4>Are you sure you want to delete the following game?</h4>
     <h5>Title: @Model.Title</h5>
-    <p>Description: @Model.Description</p>
-    <p>Release Date: @Model.ReleaseDate.ToString("yyyy-MM-dd")</p>
-    <p>Genre: @Model.Genre</p>
-    <p>Price: @Model.Price</p>
-    <p>Platform: @Model.Platform</p>
+    <p><strong>Description:</strong> @Model.Description</p>
+    <p><strong>Release Date:</strong> @Model.ReleaseDate.ToString("yyyy-MM-dd")</p>
+    <p><strong>Genre:</strong> @Model.Genre</p>
+    <p><strong>Price:</strong> @Model.Price</p>
+    <p><strong>Platform:</strong> @Model.Platform</p>
 
     <form asp-action="DeleteGameConfirmed" method="post">
         <input type="hidden" asp-for="Id" />
-        <div>
+        <div style="margin-top: 20px;">
             <input type="submit" value="Delete" class="btn btn-danger" />
-            <a asp-action="GameManagement" class="btn btn-secondary">Cancel</a>
+            <a asp-action="GameManagement" class="btn btn-secondary" style="margin-left: 10px;">Cancel</a>
         </div>
     </form>
 </div>
