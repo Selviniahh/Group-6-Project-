@@ -98,6 +98,7 @@ namespace Group6WebProject.Controllers
         }
 
         // Delete Game
+        // Delete Game Action
         public IActionResult DeleteGame(int id)
         {
             if (!IsAdmin())
