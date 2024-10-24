@@ -55,7 +55,8 @@ public class ApplicationDbContext : DbContext
                 Id = 1,
                 UserId = 1,
                 Name = "Default User",
-                Email = "DefaultUser@example.com",
+                Gender = Gender.PreferNotToSay,
+                BirthDate = new DateTime(2000, 1, 1),
             });
     }
 }

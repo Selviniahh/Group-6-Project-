@@ -5,12 +5,12 @@ namespace Group6WebProject.Data;
 
 public enum Gender
 {
-    NotSelected,
     Male,
     Female,
     PreferNotToSay,
 }
 
+// Let members enter their actual name, gender, and birth date
 public class Profile
 {
     [Key]
@@ -18,13 +18,18 @@ public class Profile
     
     public int UserId { get; set; }
     
-    [ReadOnly(true)]
     [Display(Name = "Name")]
-    public string Name { get; set; }    
+    [MaxLength(250)]
+    public string? Name { get; set; }    
     
-    [ReadOnly(true)]
-    [Display(Name = "Email")]
-    public string? Email { get; set; }
+    [Display (Name = "Gender")]
+    public Gender? Gender { get; set; }
+    
+    [Display(Name = "Birth Date")]
+    public DateTime? BirthDate { get; set; }
+    
+    [Display(Name = "Receive CVGS")]
+    public bool ReceiveCvgs { get; set; }
     
     // ... Other properties ...
 }

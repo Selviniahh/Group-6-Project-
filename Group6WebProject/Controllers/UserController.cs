@@ -7,9 +7,7 @@ using Group6WebProject.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 
 namespace Group6WebProject.Controllers;
@@ -275,7 +273,7 @@ public class UserController : Controller
 
         if (!int.TryParse(userIdClaim, out int userId))
         {
-            // Handle the case where UserID is not a valid integer
+            // UserID is not a valid integer
             return BadRequest("Invalid UserID format.");
         }
 
@@ -292,49 +290,30 @@ public class UserController : Controller
         {
             UserId = userId,
             Name = User.FindFirst(ClaimTypes.Name)?.Value,
-            Email = User.FindFirst(ClaimTypes.Email)?.Value,
-            // Biography = "Please describe briefly about yourself.",
-            // LastLogin = DateTime.Now,
-            // ReceivePromotionalEmails = false,
-            // Gender = Gender.NotSelected,
-            // Country = string.Empty,
-            // FavouriteVideoGame = string.Empty,
-            // ContactNumber = string.Empty,
-            // DateOfBirth = DateTime.Now
+            Gender = null,
+            BirthDate = null,
+            ReceiveCvgs = false
         };
 
         return View(model);
     }
 
-    private static readonly object _lock = new object();
-
     [HttpPost]
     public async Task<IActionResult> SaveProfile(Profile model)
     {
-        Profile existingProfile;
-
-        lock (_lock)
+        if (ModelState.IsValid)
         {
-            existingProfile = _dbContext.Profiles.FirstOrDefault(p => p.UserId == model.UserId);
+            var existingProfile = _dbContext.Profiles.FirstOrDefault(p => p.UserId == model.UserId);
             if (existingProfile != null)
             {
-                // Update existing profile
-                // existingProfile.Biography = model.ProfilePicture;
-                // existingProfile.FavouriteVideoGame = model.FavouriteVideoGame;
-                // existingProfile.Biography = model.Biography;
-                // existingProfile.DateOfBirth = model.DateOfBirth;
-                // existingProfile.Gender = model.Gender;
-                // existingProfile.Country = model.Country;
-                // existingProfile.ContactNumber = model.ContactNumber;
-                // existingProfile.ReceivePromotionalEmails = model.ReceivePromotionalEmails;
-                // existingProfile.LastLogin = DateTime.Now;
-                existingProfile.Email = model.Email;
+                existingProfile.Gender = model.Gender;
                 existingProfile.Name = model.Name;
+                existingProfile.BirthDate = model.BirthDate;
+                existingProfile.ReceiveCvgs = model.ReceiveCvgs;
             }
             else
             {
                 // Create new profile
-                // model. = DateTime.Now;
                 _dbContext.Profiles.Add(model);
             }
         }

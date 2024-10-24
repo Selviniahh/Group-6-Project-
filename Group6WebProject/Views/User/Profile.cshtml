@@ -31,81 +31,36 @@ Layout = "_Layout";
         <!-- Name (Read-Only) -->
         <div class="form-group">
             <label asp-for="Name"></label>
-            <input asp-for="Name" class="form-control" style="width: 400px;" readonly />
+            <input asp-for="Name" class="form-control" style="width: 400px;"/>
             <span asp-validation-for="Name" class="text-danger"></span>
         </div>
 
-        <!-- Email (Read-Only) -->
+        <!-- Gender -->
         <div class="form-group">
-            <label asp-for="Email"></label>
-            <input asp-for="Email" class="form-control" style="width: 400px;" readonly />
-            <span asp-validation-for="Email" class="text-danger"></span>
+            <label asp-for="Gender"></label>
+            <select asp-for="Gender" class="form-control" style="width: 400px;">
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="PreferNotToSay">Prefer Not To Say</option>
+            </select>
+            <span asp-validation-for="Gender" class="text-danger"></span>
         </div>
-
-        @* <!-- Profile Picture --> *@
-        @* <div class="form-group"> *@
-        @*     <label asp-for="ProfilePicture"></label> *@
-        @*     <input asp-for="ProfilePicture" class="form-control" type="file" style="width: 400px;" /> *@
-        @*     <span asp-validation-for="ProfilePicture" class="text-danger"></span> *@
-        @* </div> *@
-        @* *@
-        @* <!-- Favourite Video Game --> *@
-        @* <div class="form-group"> *@
-        @*     <label asp-for="FavouriteVideoGame"></label> *@
-        @*     <input asp-for="FavouriteVideoGame" class="form-control" style="width: 400px;" /> *@
-        @*     <span asp-validation-for="FavouriteVideoGame" class="text-danger"></span> *@
-        @* </div> *@
-        @* *@
-        @* <!-- Biography --> *@
-        @* <div class="form-group"> *@
-        @*     <label asp-for="Biography"></label> *@
-        @*     <textarea asp-for="Biography" class="form-control" style="width: 400px; height: 100px;"></textarea> *@
-        @*     <span asp-validation-for="Biography" class="text-danger"></span> *@
-        @* </div> *@
-        @* *@
-        @* <!-- Date of Birth --> *@
-        @* <div class="form-group"> *@
-        @*     <label asp-for="DateOfBirth"></label> *@
-        @*     <input asp-for="DateOfBirth" class="form-control" type="date" style="width: 400px;" /> *@
-        @*     <span asp-validation-for="DateOfBirth" class="text-danger"></span> *@
-        @* </div> *@
-        @* *@
-        @* <!-- Gender --> *@
-        @* <div class="form-group"> *@
-        @*     <label asp-for="Gender"></label> *@
-        @*     <select asp-for="Gender" class="form-control" asp-items="Html.GetEnumSelectList<Gender>()" style="width: 400px;"> *@
-        @*         <option value="">-- Select Gender --</option> *@
-        @*     </select> *@
-        @*     <span asp-validation-for="Gender" class="text-danger"></span> *@
-        @* </div> *@
-        @* *@
-        @* <!-- Country --> *@
-        @* <div class="form-group"> *@
-        @*     <label asp-for="Country"></label> *@
-        @*     <input asp-for="Country" class="form-control" style="width: 400px;" /> *@
-        @*     <span asp-validation-for="Country" class="text-danger"></span> *@
-        @* </div> *@
-        @* *@
-        @* <!-- Contact Number --> *@
-        @* <div class="form-group"> *@
-        @*     <label asp-for="ContactNumber"></label> *@
-        @*     <input asp-for="ContactNumber" class="form-control" style="width: 400px;" /> *@
-        @*     <span asp-validation-for="ContactNumber" class="text-danger"></span> *@
-        @* </div> *@
-        @* *@
-        @* <!-- Receive Promotional Emails --> *@
-        @* <div class="form-group form-check"> *@
-        @*     <input asp-for="ReceivePromotionalEmails" class="form-check-input" type="checkbox" /> *@
-        @*     <label asp-for="ReceivePromotionalEmails" class="form-check-label"></label> *@
-        @*     <span asp-validation-for="ReceivePromotionalEmails" class="text-danger"></span> *@
-        @* </div> *@
-        @* *@
-        @* <!-- Last Login (Read-Only) --> *@
-        @* <div class="form-group"> *@
-        @*     <label asp-for="LastLogin"></label> *@
-        @*     <input asp-for="LastLogin" class="form-control" style="width: 400px;" readonly /> *@
-        @*     <span asp-validation-for="LastLogin" class="text-danger"></span> *@
-        @* </div> *@
+        
+        <!-- BirthDate -->
+        <div class="form-group">
+            <label asp-for="BirthDate"></label>
+            <input asp-for="BirthDate" class="form-control" style="width: 400px;" />
+            <span asp-validation-for="BirthDate" class="text-danger"></span>
+        </div>
+        
+        <!-- ReceiveCvgs -->
+        <div class="form-group">
+            <label asp-for="ReceiveCvgs"></label>
+            <input asp-for="ReceiveCvgs" type="checkbox" class="form-check-input" />
+            <span asp-validation-for="ReceiveCvgs" class="text-danger"></span>
+        </div>
+        
         
         <input hidden asp-for="UserId"></input>
 

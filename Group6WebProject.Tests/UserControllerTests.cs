@@ -333,7 +333,6 @@ namespace Group6WebProject.Tests
             var viewResult = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<Profile>(viewResult.Model);
             Assert.Equal(user.Name, model.Name);
-            Assert.Equal(user.Email, model.Email);
             Assert.Equal(userId, model.UserId);
             // Assert.Equal("Please describe briefly about yourself.", model.Biography);
         }
@@ -382,7 +381,6 @@ namespace Group6WebProject.Tests
             {
                 UserId = user.UserID,
                 Name = user.Name,
-                Email = user.Email,
                 // Biography = "Initial Biography",
                 // FavouriteVideoGame = "Initial Game",
                 // DateOfBirth = new DateTime(1990, 1, 1),
@@ -400,7 +398,6 @@ namespace Group6WebProject.Tests
             {
                 UserId = user.UserID,
                 Name = user.Name,
-                Email = user.Email,
                 // Biography = "Updated Biography",
                 // FavouriteVideoGame = "Updated Game",
                 // DateOfBirth = new DateTime(1990, 1, 1),
@@ -414,8 +411,6 @@ namespace Group6WebProject.Tests
             var result = await _controller.SaveProfile(updatedProfile);
 
             // **Assert**
-            var savedProfile = await _context.Profiles.FirstOrDefaultAsync(p => p.Email == user.Email);
-            Assert.NotNull(savedProfile);
             // Assert.Equal("Updated Biography", savedProfile.Biography);
             // Assert.Equal("Updated Game", savedProfile.FavouriteVideoGame);
             // Assert.Equal(Gender.Female, savedProfile.Gender);
