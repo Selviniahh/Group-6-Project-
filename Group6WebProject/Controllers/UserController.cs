@@ -31,7 +31,44 @@ public class UserController : Controller
     {
         return View();
     }
-    
+
+    [HttpGet]
+    public IActionResult ForgetPassword()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<ViewResult> ForgetPassword(ForgetPasswordViewModel model)
+    {
+        // 1. Check if the given email exists, if not add error message to the model state
+        var user = _dbContext.Users.FirstOrDefault(u => u.Email == model.Email);
+        if (user == null)
+        {
+            ModelState.AddModelError(string.Empty, "Email does not exist.");
+            return View(model);
+        }
+
+        //Generate a random password, hash and assign it to the user, update the DB 
+        var newPassword = Guid.NewGuid().ToString().Substring(0, 20);
+        var hashedPassword = HashPassword(newPassword);
+        user.PasswordHash = hashedPassword;
+        await _dbContext.SaveChangesAsync();
+
+        //Send an email to the user with the new password
+        var emailBody = $@"
+            Hello {user.Name}, <br/><br/>
+            Your password has been reset. Your new password is: <strong>{newPassword}</strong> <br/><br/>
+            Please change your password after logging in from the Profiles tab. <br/><br/>";
+
+        await _emailService.SendEmailAsync(user.Email, "Password Reset", emailBody);
+        
+        TempData["SuccessMessage"] = "Your new password has been emailed to your email account.";
+        
+        return View("Login");
+    }
+
+
     [HttpPost]
     [Authorize]
     public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
@@ -40,10 +77,10 @@ public class UserController : Controller
         {
             return View(model);
         }
-        
+
         // Retrieve the UserID from the claims
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        
+
         //out simply means pass by ref like "int& userId" in C++ 
         if (!int.TryParse(userIdClaim, out int userId))
         {
@@ -52,8 +89,8 @@ public class UserController : Controller
 
         var user = await _dbContext.Users.FindAsync(userId);
         if (user == null) return NotFound("User not found.");
-        
-        //Verify the fcurrent password 
+
+        //Verify the current password 
         var currentPasswordHash = HashPassword(model.CurrentPassword);
         if (user.PasswordHash != currentPasswordHash)
         {
@@ -214,11 +251,11 @@ public class UserController : Controller
                     var attemptsLeft = 3 - user.FailedLoginAttempts;
                     ModelState.AddModelError(string.Empty, $"Invalid login attempt. You have {attemptsLeft} more attempt(s) before your account is locked.");
                 }
-                
+
                 await _dbContext.SaveChangesAsync();
                 return View(model);
             }
-            
+
             //Since password is correct, reset failed login attempts
             user.FailedLoginAttempts = 0;
             user.LockoutEnd = null;
@@ -323,7 +360,7 @@ public class UserController : Controller
 
         TempData["SuccessMessage"] = "Your profile has been saved successfully.";
         return RedirectToAction("Profile"); // Redirect back to the "Profile" action after a successful save
-        
+
         //Test
     }
 }
