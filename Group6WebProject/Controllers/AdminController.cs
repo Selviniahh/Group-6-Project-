@@ -5,111 +5,180 @@ using Microsoft.EntityFrameworkCore;
 using Group6WebProject.Data;
 using System.Security.Claims;
 
-namespace Group6WebProject.Controllers;
-
-[Authorize]
-public class AdminController : Controller
+namespace Group6WebProject.Controllers
 {
-    private readonly ApplicationDbContext _dbContext;
-
-    public AdminController(ApplicationDbContext dbContext)
+    [Authorize]
+    public class AdminController : Controller
     {
-        _dbContext = dbContext;
-    }
+        private readonly ApplicationDbContext _dbContext;
 
-    private bool IsAdmin()
-    {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (int.TryParse(userIdClaim, out int userId))
+        public AdminController(ApplicationDbContext dbContext)
         {
-            var user = _dbContext.Users.Find(userId);
-            return user != null && user.IsAdmin;
-        }
-        return false;
-    }
-
-    public IActionResult Index()
-    {
-        if (!IsAdmin())
-        {
-            return Forbid();
+            _dbContext = dbContext;
         }
 
-        return View();
-    }
-
-    // Game Management
-    public IActionResult GameManagement()
-    {
-        if (!IsAdmin())
+        private bool IsAdmin()
         {
-            return Forbid();
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var user = _dbContext.Users.Find(userId);
+                return user != null && user.IsAdmin;
+            }
+            return false;
         }
 
-        var games = _dbContext.Set<Game>().ToList();
-        return View(games);
-    }
-
-    [HttpPost]
-    public IActionResult AddGame(Game game)
-    {
-        if (!IsAdmin())
+        public IActionResult Index()
         {
-            return Forbid();
+            if (!IsAdmin())
+            {
+                return Forbid();
+            }
+
+            return View();
         }
 
-        _dbContext.Games.Add(game);
-        _dbContext.SaveChanges();
-        return RedirectToAction("GameManagement");
-    }
-
-    // Event Management
-    public IActionResult EventManagement()
-    {
-        if (!IsAdmin())
+        // Game Management
+        public IActionResult GameManagement()
         {
-            return Forbid();
+            if (!IsAdmin())
+            {
+                return Forbid();
+            }
+
+            var games = _dbContext.Games.ToList();
+            return View(games);
         }
 
-        var events = _dbContext.Set<Event>().ToList();
-        return View(events);
-    }
-
-    [HttpPost]
-    public IActionResult AddEvent(Event eventItem)
-    {
-        if (!IsAdmin())
+        [HttpPost]
+        public IActionResult AddGame(Game game)
         {
-            return Forbid();
+            if (!IsAdmin())
+            {
+                return Forbid();
+            }
+
+            _dbContext.Games.Add(game);
+            _dbContext.SaveChanges();
+            return RedirectToAction("GameManagement");
         }
 
-        _dbContext.Events.Add(eventItem);
-        _dbContext.SaveChanges();
-        return RedirectToAction("EventManagement");
-    }
-
-    // Game Reviews
-    public IActionResult GameReviews()
-    {
-        if (!IsAdmin())
+        // Edit Game
+        public IActionResult EditGame(int id)
         {
-            return Forbid();
+            if (!IsAdmin())
+            {
+                return Forbid();
+            }
+
+            var game = _dbContext.Games.Find(id);
+            if (game == null)
+            {
+                return NotFound();
+            }
+
+            return View(game);
         }
 
-        var reviews = _dbContext.Set<Review>().ToList();
-        return View(reviews);
-    }
-
-    [HttpPost]
-    public IActionResult AddReview(Review review)
-    {
-        if (!IsAdmin())
+        [HttpPost]
+        public IActionResult EditGame(Game game)
         {
-            return Forbid();
+            if (!IsAdmin())
+            {
+                return Forbid();
+            }
+
+            if (ModelState.IsValid)
+            {
+                _dbContext.Games.Update(game);
+                _dbContext.SaveChanges();
+                return RedirectToAction("GameManagement");
+            }
+            return View(game);
         }
 
-        _dbContext.Reviews.Add(review);
-        _dbContext.SaveChanges();
-        return RedirectToAction("GameReviews");
+        // Delete Game
+        public IActionResult DeleteGame(int id)
+        {
+            if (!IsAdmin())
+            {
+                return Forbid();
+            }
+
+            var game = _dbContext.Games.Find(id);
+            if (game == null)
+            {
+                return NotFound();
+            }
+
+            return View(game);
+        }
+
+        [HttpPost, ActionName("DeleteGame")]
+        public IActionResult DeleteGameConfirmed(int id)
+        {
+            if (!IsAdmin())
+            {
+                return Forbid();
+            }
+
+            var game = _dbContext.Games.Find(id);
+            if (game != null)
+            {
+                _dbContext.Games.Remove(game);
+                _dbContext.SaveChanges();
+            }
+            return RedirectToAction("GameManagement");
+        }
+
+        // Event Management
+        public IActionResult EventManagement()
+        {
+            if (!IsAdmin())
+            {
+                return Forbid();
+            }
+
+            var events = _dbContext.Set<Event>().ToList();
+            return View(events);
+        }
+
+        [HttpPost]
+        public IActionResult AddEvent(Event eventItem)
+        {
+            if (!IsAdmin())
+            {
+                return Forbid();
+            }
+
+            _dbContext.Events.Add(eventItem);
+            _dbContext.SaveChanges();
+            return RedirectToAction("EventManagement");
+        }
+
+        // Game Reviews
+        public IActionResult GameReviews()
+        {
+            if (!IsAdmin())
+            {
+                return Forbid();
+            }
+
+            var reviews = _dbContext.Set<Review>().ToList();
+            return View(reviews);
+        }
+
+        [HttpPost]
+        public IActionResult AddReview(Review review)
+        {
+            if (!IsAdmin())
+            {
+                return Forbid();
+            }
+
+            _dbContext.Reviews.Add(review);
+            _dbContext.SaveChanges();
+            return RedirectToAction("GameReviews");
+        }
     }
 }
