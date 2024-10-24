@@ -1,42 +1,100 @@
-﻿@model List<Event>;
+﻿@model List<Event>
 
 @{
-    ViewBag.Title = "title";
-    Layout = "_Layout";
+ViewBag.Title = "Event Management";
+Layout = "_Layout";
 }
 
 <h2>Event Management</h2>
-<form method="post" action="/Admin/AddEvent">
-    <label for="Name">Event Name</label>
-    <input type="text" id="Name" name="Name" required/>
-    
-    <label for="Description">Description</label>
-    <input type="text" id="Description" name="Description" required/>
-    
-    <label for="Date">EventDate</label>
-    <input type="date" id="Date" name="Date" required/>
-    
-    <button type="submit">Add Event</button>
+
+<form method="post" action="/Admin/AddEvent" style="max-width: 600px; margin-bottom: 20px;">
+    <div class="form-group">
+        <label for="Name">Event Name</label>
+        <input type="text" id="Name" name="Name" required class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="Description">Description</label>
+        <textarea id="Description" name="Description" required class="form-control"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="Date">Event Date</label>
+        <input type="date" id="Date" name="Date" required class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Event</button>
 </form>
 
-<table border="1">
+<table class="table" style="width: 100%; border-collapse: collapse;">
     <thead>
     <tr>
         <th>ID</th>
         <th>Name</th>
         <th>Description</th>
-        <th>EventDate</th>
+        <th>Event Date</th>
     </tr>
     </thead>
     <tbody>
     @foreach (var eventItem in Model)
     {
-        <tr>
-            <td>@eventItem.Id</td>
-            <td>@eventItem.Name</td>
-            <td>@eventItem.Description</td>
-            <td>@eventItem.EventDate.ToString("yyyy-MM-dd")</td>
-        </tr>
+    <tr>
+        <td>@eventItem.Id</td>
+        <td>@eventItem.Name</td>
+        <td>@eventItem.Description</td>
+        <td>@eventItem.EventDate.ToString("yyyy-MM-dd")</td>
+    </tr>
     }
     </tbody>
 </table>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    .btn {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        color: white;
+        background-color: #007bff;
+        cursor: pointer;
+    }
+
+    .btn:hover {
+        background-color: #0056b3;
+    }
+
+    table {
+        margin-top: 20px;
+        border: 1px solid #ddd;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+</style>
