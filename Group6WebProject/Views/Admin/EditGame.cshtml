@@ -1,0 +1,40 @@
+﻿@model Group6WebProject.Models.Game
+
+<h2>Edit Game</h2>
+
+<form asp-action="EditGame" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div>
+        <label asp-for="Title"></label>
+        <input asp-for="Title" />
+        <span asp-validation-for="Title"></span>
+    </div>
+    <div>
+        <label asp-for="Description"></label>
+        <textarea asp-for="Description"></textarea>
+        <span asp-validation-for="Description"></span>
+    </div>
+    <div>
+        <label asp-for="ReleaseDate"></label>
+        <input asp-for="ReleaseDate" type="date" />
+        <span asp-validation-for="ReleaseDate"></span>
+    </div>
+    <div>
+        <label asp-for="Genre"></label>
+        <input asp-for="Genre" />
+        <span asp-validation-for="Genre"></span>
+    </div>
+    <div>
+        <label asp-for="Price"></label>
+        <input asp-for="Price" />
+        <span asp-validation-for="Price"></span>
+    </div>
+    <div>
+        <label asp-for="Platform"></label>
+        <input asp-for="Platform" />
+        <span asp-validation-for="Platform"></span>
+    </div>
+    <div>
+        <input type="submit" value="Save" />
+    </div>
+</form>
