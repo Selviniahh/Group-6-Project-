@@ -98,7 +98,6 @@ namespace Group6WebProject.Controllers
         }
 
         // Delete Game
-        // Delete Game Action
         public IActionResult DeleteGame(int id)
         {
             if (!IsAdmin())
@@ -115,7 +114,7 @@ namespace Group6WebProject.Controllers
             return View(game);
         }
 
-        [HttpPost, ActionName("DeleteGame")]
+        [HttpPost,]
         public IActionResult DeleteGameConfirmed(int id)
         {
             if (!IsAdmin())
@@ -127,9 +126,9 @@ namespace Group6WebProject.Controllers
             if (game != null)
             {
                 _dbContext.Games.Remove(game);
-                _dbContext.SaveChanges();
+                _dbContext.SaveChanges(); // Persist changes to the database
             }
-            return RedirectToAction("GameManagement");
+            return RedirectToAction("GameManagement"); // Redirect back to the Game Management page
         }
 
         // Event Management
