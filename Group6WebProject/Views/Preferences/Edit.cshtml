@@ -1,0 +1,48 @@
+@model Group6WebProject.Models.MemberPreferences
+
+@{
+    ViewData["Title"] = "Edit Preferences";
+}
+
+<h2>Edit Preferences</h2>
+
+<form asp-action="Edit" method="post">
+    <div class="form-group">
+        <label>Favorite Platforms</label>
+        <div>
+            @foreach (var platform in ViewBag.Platforms as List<string>)
+            {
+            <input type="checkbox" name="FavouritePlatforms" value="@platform"
+                   @(Model.FavouritePlatforms.Contains(platform) ? "checked" : "") />
+            <label>@platform</label><br />
+            }
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Favorite Game Categories</label>
+        <div>
+            @foreach (var category in ViewBag.Categories as List<string>)
+            {
+            <input type="checkbox" name="FavouriteGameCategories" value="@category"
+                   @(Model.FavouriteGameCategories.Contains(category) ? "checked" : "") />
+            <label>@category</label><br />
+            }
+            }
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Language Preferences</label>
+        <div>
+            @foreach (var language in ViewBag.Languages as List<string>)
+            {
+            <input type="checkbox" name="LanguagePreferences" value="@language"
+                   @(Model.LanguagePreferences.Contains(language) ? "checked" : "") />
+            <label>@language</label><br />
+            }
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update Preferences</button>
+</form>

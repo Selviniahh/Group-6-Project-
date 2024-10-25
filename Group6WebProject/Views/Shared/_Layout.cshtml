@@ -22,9 +22,12 @@
                     <li class="nav-item">
                         <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                     </li>
+                    @if (User.Identity.IsAuthenticated)
+                    {
                     <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Preferences" asp-action="Index">Preferences</a>
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Preferences" asp-action="PreferencesIndex">Preferences</a>
                     </li>
+                    }
                     <li class="nav-item">
                         @if (User.Identity.IsAuthenticated &&
                              bool.TryParse(User.FindFirst("IsAdmin")?.Value, out bool isAdmin) && isAdmin)

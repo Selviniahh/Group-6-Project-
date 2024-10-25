@@ -1,0 +1,62 @@
+@model Group6WebProject.Models.MemberPreferences
+
+@{
+    ViewData["Title"] = "Your Preferences";
+}
+
+<h2>Your Preferences</h2>
+
+<div>
+    <h3>Favorite Platforms</h3>
+    <ul>
+     @if (Model?.FavouritePlatforms != null && Model.FavouritePlatforms.Any())
+     {
+          foreach (var platform in Model.FavouritePlatforms)
+          {
+              <li>@platform</li>
+          }
+     }
+     else
+     {
+       <li>No favorite platforms selected.</li>
+     }        
+    </ul>
+</div>
+
+<div>
+    <h3>Favorite Game Categories</h3>
+    <ul>
+        
+        @if (Model?.FavouriteGameCategories != null && Model.FavouriteGameCategories.Any())
+        {
+            foreach (var category in Model.FavouriteGameCategories)
+           {
+             <li>@category</li>
+           }
+        }
+        else
+        {
+            <li>No favorite category selected.</li>
+        }
+    </ul>
+</div>
+
+<div>
+    <h3>Language Preferences</h3>
+    <ul>
+        
+        @if (Model?.LanguagePreferences != null && Model.LanguagePreferences.Any())
+        {
+            foreach (var language in Model.LanguagePreferences)
+            {
+                <li>@language</li>
+            }
+        }
+        else
+        {
+            <li>No favorite language selected.</li>
+        }
+    </ul>
+</div>
+
+<a asp-action="Edit" class="btn btn-secondary">Edit Preferences</a>
