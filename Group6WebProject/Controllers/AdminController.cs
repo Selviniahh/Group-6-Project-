@@ -175,7 +175,7 @@ public IActionResult EditEvent(Event eventItem)
     {
         _dbContext.Events.Update(eventItem);
         _dbContext.SaveChanges();
-        
+        TempData["SuccessMessage"] = "Event updated successfully!";
         return RedirectToAction("EventManagement");
     }
 
