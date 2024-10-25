@@ -1,0 +1,46 @@
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Group6WebProject.Models.MemberPreferences
+
+@{
+    ViewData["Title"] = "Create Preferences";
+ }
+
+<h2>Create Preferences</h2>
+
+<form asp-action="Create" method="post">
+    
+    <div class="form-group">
+        <label>Favorite Platforms</label>
+        <div>
+            @foreach (var platform in (ViewBag.Platforms as List<string>)!)
+            {
+            <input type="checkbox" name="FavouritePlatforms" value="@platform" @(Model.FavouritePlatforms.Contains(platform) ? "checked" : "") />
+            <label>@platform</label><br />
+            }
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Favorite Game Categories</label>
+        @foreach (var category in (ViewBag.Categories as List<string>)!)
+        {
+        <input type="checkbox" name="FavouriteGameCategories" value="@category"
+               @(Model.FavouriteGameCategories.Contains(category) ? "checked" : "") />
+        <label>@category</label><br />
+        }
+    </div>
+
+    <div class="form-group">
+        <label>Language Preferences</label>
+        <div>
+            
+        @foreach (var language in (ViewBag.Languages as List<string>)!)
+        {
+            <input type="checkbox" name="LanguagePreferences" value="@language"
+                   @(Model.LanguagePreferences.Contains(language) ? "checked" : "")/>
+        }
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary" asp->Save Preferences</button>
+</form>

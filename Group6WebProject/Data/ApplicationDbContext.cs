@@ -1,6 +1,7 @@
 using Group6WebProject.Controllers;
 using Group6WebProject.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Group6WebProject.Data;
 
@@ -25,7 +26,7 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<User>()
             .Property(u => u.Status)
             .HasConversion<string>();
-
+        
         // Seed the database with a single user as an instance in the User table
         modelBuilder.Entity<User>().HasData(
             new User()
