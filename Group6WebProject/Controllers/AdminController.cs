@@ -155,6 +155,59 @@ namespace Group6WebProject.Controllers
             _dbContext.SaveChanges();
             return RedirectToAction("EventManagement");
         }
+        // GET: Display Edit Event Form
+public IActionResult EditEvent(int id)
+{
+    var eventItem = _dbContext.Events.Find(id);
+    if (eventItem == null)
+    {
+        return NotFound();
+    }
+
+    return View(eventItem);
+}
+
+// POST: Edit Event
+[HttpPost]
+public IActionResult EditEvent(Event eventItem)
+{
+    if (ModelState.IsValid)
+    {
+        _dbContext.Events.Update(eventItem);
+        _dbContext.SaveChanges();
+        
+        return RedirectToAction("EventManagement");
+    }
+
+    return View(eventItem); // Return to the view if validation fails
+}
+// GET: Display Delete Event Confirmation
+public IActionResult DeleteEvent(int id)
+{
+    var eventItem = _dbContext.Events.Find(id);
+    if (eventItem == null)
+    {
+        return NotFound();
+    }
+
+    return View(eventItem);
+}
+
+// POST: Delete Event Confirmed
+[HttpPost]
+public IActionResult DeleteEventConfirmed(int id)
+{
+    var eventItem = _dbContext.Events.Find(id);
+    if (eventItem != null)
+    {
+        _dbContext.Events.Remove(eventItem);
+        _dbContext.SaveChanges();
+      
+    }
+
+    return RedirectToAction("EventManagement");
+}
+
 
         // Game Reviews
         public IActionResult GameReviews()
@@ -180,5 +233,7 @@ namespace Group6WebProject.Controllers
             _dbContext.SaveChanges();
             return RedirectToAction("GameReviews");
         }
+
+       
     }
 }
