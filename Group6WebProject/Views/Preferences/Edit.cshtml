@@ -10,7 +10,7 @@
     <div class="form-group">
         <label>Favorite Platforms</label>
         <div>
-            @foreach (var platform in ViewBag.Platforms as List<string>)
+            @foreach (var platform in (ViewBag.Platforms as List<string>)!)
             {
             <input type="checkbox" name="FavouritePlatforms" value="@platform"
                    @(Model.FavouritePlatforms.Contains(platform) ? "checked" : "") />
@@ -22,12 +22,11 @@
     <div class="form-group">
         <label>Favorite Game Categories</label>
         <div>
-            @foreach (var category in ViewBag.Categories as List<string>)
+            @foreach (var category in (ViewBag.Categories as List<string>)!)
             {
             <input type="checkbox" name="FavouriteGameCategories" value="@category"
                    @(Model.FavouriteGameCategories.Contains(category) ? "checked" : "") />
             <label>@category</label><br />
-            }
             }
         </div>
     </div>
@@ -35,7 +34,7 @@
     <div class="form-group">
         <label>Language Preferences</label>
         <div>
-            @foreach (var language in ViewBag.Languages as List<string>)
+            @foreach (var language in (ViewBag.Languages as List<string>)!)
             {
             <input type="checkbox" name="LanguagePreferences" value="@language"
                    @(Model.LanguagePreferences.Contains(language) ? "checked" : "") />

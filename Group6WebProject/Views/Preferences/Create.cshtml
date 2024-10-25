@@ -1,11 +1,9 @@
-@using System.Security.Claims
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model Group6WebProject.Models.MemberPreferences
-@using Group6WebProject.Controllers
 
 @{
     ViewData["Title"] = "Create Preferences";
-}
+ }
 
 <h2>Create Preferences</h2>
 
@@ -14,10 +12,9 @@
     <div class="form-group">
         <label>Favorite Platforms</label>
         <div>
-            @foreach (var platform in ViewBag.Platforms as List<string>)
+            @foreach (var platform in (ViewBag.Platforms as List<string>)!)
             {
-            <input type="checkbox" name="FavouritePlatforms" value="@platform"
-                   @(Model.FavouritePlatforms.Contains(platform) ? "checked" : "") />
+            <input type="checkbox" name="FavouritePlatforms" value="@platform" @(Model.FavouritePlatforms.Contains(platform) ? "checked" : "") />
             <label>@platform</label><br />
             }
         </div>
@@ -25,7 +22,7 @@
 
     <div class="form-group">
         <label>Favorite Game Categories</label>
-        @foreach (var category in ViewBag.Categories as List<string>)
+        @foreach (var category in (ViewBag.Categories as List<string>)!)
         {
         <input type="checkbox" name="FavouriteGameCategories" value="@category"
                @(Model.FavouriteGameCategories.Contains(category) ? "checked" : "") />
@@ -37,7 +34,7 @@
         <label>Language Preferences</label>
         <div>
             
-        @foreach (var language in ViewBag.Languages as List<string>)
+        @foreach (var language in (ViewBag.Languages as List<string>)!)
         {
             <input type="checkbox" name="LanguagePreferences" value="@language"
                    @(Model.LanguagePreferences.Contains(language) ? "checked" : "")/>

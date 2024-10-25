@@ -27,10 +27,24 @@ public class PreferencesController : Controller
             var preferences = await _context.MemberPreferences.FirstOrDefaultAsync(p => p.UserId == parsedUserId);
 
             if (preferences == null)
-            {
-                return RedirectToAction("Create");
+            { 
+                preferences = new MemberPreferences
+                {
+                    UserId = parsedUserId,
+                    FavouritePlatforms = new List<string>(),
+                    FavouriteGameCategories = new List<string>(),
+                    LanguagePreferences = new List<string>()
+                };
+                
+                _context.MemberPreferences.Add(preferences);
+                await _context.SaveChangesAsync();
+                
+                //return RedirectToAction("Create");
             }
 
+            ViewBag.Platforms = GetPlatformOptions();
+            ViewBag.Categories = GetCategoryOptions();
+            ViewBag.Languages = GetLanguageOptions();
             return View(preferences);
         }
 
@@ -129,19 +143,19 @@ public class PreferencesController : Controller
         return View(preference);
     }
     
-    private List<string> GetPlatformOptions()
+    private static List<string> GetPlatformOptions()
     {
-        return new List<string> { "PC", "PlayStation", "Xbox", "Nintendo", "Mobile" };
+        return ["PC", "PlayStation", "Xbox", "Nintendo", "Mobile"];
     }
 
-    private List<string> GetCategoryOptions()
+    private static List<string> GetCategoryOptions()
     {
-        return new List<string> { "Action", "Adventure", "Strategy", "Simulation", "Sports" };
+        return ["Action", "Adventure", "Strategy", "Simulation", "Sports"];
     }
 
-    private List<string> GetLanguageOptions()
+    private static List<string> GetLanguageOptions()
     {
-        return new List<string> { "English", "Spanish", "French", "German", "Japanese" };
+        return ["English", "Spanish", "French", "German", "Japanese"];
     }
 
 }
