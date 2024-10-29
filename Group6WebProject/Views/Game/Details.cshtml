@@ -1,0 +1,17 @@
+@model Group6WebProject.Models.Game
+
+@{
+ViewData["Title"] = "Game Details";
+}
+
+<h2>@Model.Title</h2>
+
+<div>
+    <h4>Genre:</h4> <p>@Model.Genre</p>
+    <h4>Platform:</h4> <p>@Model.Platform</p>
+    <h4>Release Date:</h4> <p>@Model.ReleaseDate.ToString("yyyy-MM-dd")</p>
+    <h4>Description:</h4> <p>@Model.Description</p>
+    <h4>Price:</h4> <p>@Model.Price</p>
+</div>
+
+<a asp-action="Index" asp-route-searchString="@ViewData["CurrentFilter"]" class="btn btn-secondary">Back to List</a>

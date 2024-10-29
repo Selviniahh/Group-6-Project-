@@ -1,0 +1,40 @@
+@model IEnumerable<Group6WebProject.Models.Game>
+
+@{
+    ViewData["Title"] = "Games";
+}
+
+<h2>Games</h2>
+
+<form asp-action="Index" method="get">
+    <p>
+        Search: <input type="text" name="searchString" value="@ViewData["CurrentFilter"]"/>
+        <input type="submit" value="Search" class="btn btn-primary"/>
+    </p>
+</form>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Title</th>
+        <th>Genre</th>
+        <th>Platform</th>
+        <th>Release Date</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var game in Model)
+    {
+        <tr>
+            <td>@game.Title</td>
+            <td>@game.Genre</td>
+            <td>@game.Platform</td>
+            <td>@game.ReleaseDate.ToString("yyyy-MM-dd")</td>
+            <td>
+                <a asp-action="Details" asp-route-id="@game.Id" asp-route-searchString="@ViewData["CurrentFilter"]" class="btn btn-info">Details</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

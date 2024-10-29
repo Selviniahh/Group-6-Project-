@@ -22,19 +22,28 @@
                     <li class="nav-item">
                         <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                     </li>
+
+                    @* Preferences page if user logged in *@
                     @if (User.Identity.IsAuthenticated)
                     {
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Preferences" asp-action="PreferencesIndex">Preferences</a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Preferences" asp-action="PreferencesIndex">Preferences</a>
+                        </li>
                     }
+
+                    @* Admin page if user logged in as admin *@
                     <li class="nav-item">
-                        @if (User.Identity.IsAuthenticated &&
-                             bool.TryParse(User.FindFirst("IsAdmin")?.Value, out bool isAdmin) && isAdmin)
+                        @if (User.Identity.IsAuthenticated && bool.TryParse(User.FindFirst("IsAdmin")?.Value, out bool isAdmin) && isAdmin)
                         {
                             <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Admin </a>
                         }
                     </li>
+
+                    @* Game page no user logging in required to search a game *@
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-controller="Admin" asp-action="Index">Admin</a>
+                    </li>
+
                 </ul>
 
                 @* If user is authenticated, display a greeting message and a logout button, otherwise display login and register buttons. *@
@@ -64,7 +73,7 @@
 
 <footer class="border-top footer text-muted">
     <div class="container">
-        &copy; 2024 - Group6WebProject 
+        &copy; 2024 - Group6WebProject
     </div>
 </footer>
 <script src="~/lib/jquery/dist/jquery.min.js"></script>

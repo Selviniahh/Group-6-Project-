@@ -18,3 +18,5 @@ node_modules/
 *.vcxproj.user
 *.vcxproj.filters
 .env
+Group6WebProject/Migrations
+Migrations/
