@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Group6WebProject.Models;
 
 namespace Group6WebProject.Data;
 

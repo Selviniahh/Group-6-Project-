@@ -1,0 +1,88 @@
+@model Group6WebProject.Models.Address
+
+@{
+ViewData["Title"] = "Delete Address";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4">Delete Address</h2>
+
+    <div class="card mb-4">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0">Confirm Deletion</h5>
+        </div>
+        <div class="card-body">
+            <p>Are you sure you want to delete this address?</p>
+
+            <dl class="row">
+                <!-- Full Name -->
+                <dt class="col-sm-3">Full Name</dt>
+                <dd class="col-sm-9">@Model.FullName</dd>
+
+                <!-- Phone Number -->
+                <dt class="col-sm-3">Phone Number</dt>
+                <dd class="col-sm-9">@Model.PhoneNumber</dd>
+
+                <!-- Street Address -->
+                <dt class="col-sm-3">Street Address</dt>
+                <dd class="col-sm-9">@Model.StreetAddress</dd>
+
+                <!-- Apartment/Suite -->
+                @if (!string.IsNullOrEmpty(Model.ApartmentSuite))
+                {
+                <dt class="col-sm-3">Apartment/Suite</dt>
+                <dd class="col-sm-9">@Model.ApartmentSuite</dd>
+                }
+
+                <!-- City -->
+                <dt class="col-sm-3">City</dt>
+                <dd class="col-sm-9">@Model.City</dd>
+
+                <!-- Province/State -->
+                <dt class="col-sm-3">Province/State</dt>
+                <dd class="col-sm-9">@Model.Province</dd>
+
+                <!-- Postal Code -->
+                <dt class="col-sm-3">Postal Code</dt>
+                <dd class="col-sm-9">@Model.PostalCode</dd>
+
+                <!-- Country -->
+                <dt class="col-sm-3">Country</dt>
+                <dd class="col-sm-9">@Model.Country</dd>
+
+                <!-- Delivery Instructions -->
+                @if (!string.IsNullOrEmpty(Model.DeliveryInstructions))
+                {
+                <dt class="col-sm-3">Delivery Instructions</dt>
+                <dd class="col-sm-9">@Model.DeliveryInstructions</dd>
+                }
+
+                <!-- Shipping Address -->
+                @if (!Model.IsShippingSameAsMailing)
+                {
+                <dt class="col-sm-3">Shipping Address</dt>
+                <dd class="col-sm-9">
+                    <strong>Street Address:</strong> @Model.ShippingStreetAddress<br />
+                    @if (!string.IsNullOrEmpty(Model.ShippingApartmentSuite))
+                    {
+                    <strong>Apartment/Suite:</strong> @Model.ShippingApartmentSuite<br />
+                    }
+                    <strong>City:</strong> @Model.ShippingCity<br />
+                    <strong>Province/State:</strong> @Model.ShippingProvince<br />
+                    <strong>Postal Code:</strong> @Model.ShippingPostalCode<br />
+                    <strong>Country:</strong> @Model.ShippingCountry<br />
+                </dd>
+                }
+            </dl>
+        </div>
+    </div>
+
+    <form asp-action="DeleteConfirmed" method="post">
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.Id)
+        <div class="d-flex justify-content-between">
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+    </form>
+</div>

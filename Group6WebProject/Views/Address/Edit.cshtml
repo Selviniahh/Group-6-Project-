@@ -1,0 +1,187 @@
+@model Group6WebProject.Models.Address
+
+@{
+ViewData["Title"] = "Edit Address";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4">Edit Address</h2>
+
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        
+        @* This is necessary to pass the Id of the address to the Edit action when the form is submitted. *@
+        @Html.HiddenFor(model => model.Id)
+        
+        <!-- Mailing Address Card -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Mailing Address</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Full Name -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="FullName" class="form-label"></label>
+                        <input asp-for="FullName" class="form-control" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="PhoneNumber" class="form-label"></label>
+                        <input asp-for="PhoneNumber" class="form-control" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Street Address -->
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="StreetAddress" class="form-label"></label>
+                        <input asp-for="StreetAddress" class="form-control" />
+                        <span asp-validation-for="StreetAddress" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Apartment/Suite -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ApartmentSuite" class="form-label"></label>
+                        <input asp-for="ApartmentSuite" class="form-control" />
+                        <span asp-validation-for="ApartmentSuite" class="text-danger"></span>
+                    </div>
+
+                    <!-- City -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="City" class="form-label"></label>
+                        <input asp-for="City" class="form-control" />
+                        <span asp-validation-for="City" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Province/State -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Province" class="form-label"></label>
+                        <input asp-for="Province" class="form-control" />
+                        <span asp-validation-for="Province" class="text-danger"></span>
+                    </div>
+
+                    <!-- Postal Code -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="PostalCode" class="form-label"></label>
+                        <input asp-for="PostalCode" class="form-control" />
+                        <span asp-validation-for="PostalCode" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Country -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Country" class="form-label"></label>
+                        <input asp-for="Country" class="form-control" />
+                        <span asp-validation-for="Country" class="text-danger"></span>
+                    </div>
+
+                    <!-- Delivery Instructions -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="DeliveryInstructions" class="form-label"></label>
+                        <textarea asp-for="DeliveryInstructions" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="DeliveryInstructions" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shipping Address Card -->
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Shipping Address</h5>
+                <div class="form-check">
+                    <input type="checkbox" asp-for="IsShippingSameAsMailing" class="form-check-input" id="IsShippingSameAsMailing" />
+                    <label asp-for="IsShippingSameAsMailing" class="form-check-label"></label>
+                </div>
+            </div>
+            <div class="card-body" id="shippingAddress" style="display:none;">
+                <div class="row">
+                    <!-- Shipping Street Address -->
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="ShippingStreetAddress" class="form-label"></label>
+                        <input asp-for="ShippingStreetAddress" class="form-control" />
+                        <span asp-validation-for="ShippingStreetAddress" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Shipping Apartment/Suite -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ShippingApartmentSuite" class="form-label"></label>
+                        <input asp-for="ShippingApartmentSuite" class="form-control" />
+                        <span asp-validation-for="ShippingApartmentSuite" class="text-danger"></span>
+                    </div>
+
+                    <!-- Shipping City -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ShippingCity" class="form-label"></label>
+                        <input asp-for="ShippingCity" class="form-control" />
+                        <span asp-validation-for="ShippingCity" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Shipping Province/State -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ShippingProvince" class="form-label"></label>
+                        <input asp-for="ShippingProvince" class="form-control" />
+                        <span asp-validation-for="ShippingProvince" class="text-danger"></span>
+                    </div>
+
+                    <!-- Shipping Postal Code -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ShippingPostalCode" class="form-label"></label>
+                        <input asp-for="ShippingPostalCode" class="form-control" />
+                        <span asp-validation-for="ShippingPostalCode" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Shipping Country -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ShippingCountry" class="form-label"></label>
+                        <input asp-for="ShippingCountry" class="form-control" />
+                        <span asp-validation-for="ShippingCountry" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Buttons -->
+        <div class="d-flex justify-content-between">
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save Address</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script>
+    $(document).ready(function () {
+        function toggleShippingAddress() {
+            if ($('#IsShippingSameAsMailing').is(':checked')) {
+                $('#shippingAddress').slideUp();
+            } else {
+                $('#shippingAddress').slideDown();
+            }
+        }
+
+        $('#IsShippingSameAsMailing').change(function () {
+            toggleShippingAddress();
+        });
+
+        toggleShippingAddress(); // Initialize on page load
+    });
+</script>
+<partial name="_ValidationScriptsPartial" />
+}

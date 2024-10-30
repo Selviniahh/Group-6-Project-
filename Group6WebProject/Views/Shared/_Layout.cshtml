@@ -61,6 +61,11 @@
                     <a class="nav-link text-dark" asp-controller="User" asp-action="Login">Login</a>
                     <a class="nav-link text-dark" asp-controller="User" asp-action="Register">Register</a>
                 }
+
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <a asp-action="Index" asp-controller="Address" class="btn btn-link">Address</a>
+                }
             </div>
         </div>
     </nav>
