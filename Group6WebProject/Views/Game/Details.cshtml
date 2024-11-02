@@ -14,4 +14,31 @@ ViewData["Title"] = "Game Details";
     <h4>Price:</h4> <p>@Model.Price</p>
 </div>
 
-<a asp-action="Index" asp-route-searchString="@ViewData["CurrentFilter"]" class="btn btn-secondary">Back to List</a>
+<hr />
+
+<h4>Recommended Games: </h4>
+@if (ViewBag.gameRecommendations != null && ((List<Game>)ViewBag.gameRecommendations).Any())
+{
+    <div class="row">
+        @foreach (var gameRecommendation in (List<Game>)ViewBag.gameRecommendations)
+        {
+            <div class="col-md-3">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a asp-controller="Game" asp-action="Details" asp-route-id="@gameRecommendation.Id">
+                                @gameRecommendation.Title
+                            </a>
+                        </h5>
+                        <p class="card-text">Platform: @gameRecommendation.Platform</p>
+                        <p class="card-text">Price: @gameRecommendation.Price</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p>No recommended games found.</p>
+}

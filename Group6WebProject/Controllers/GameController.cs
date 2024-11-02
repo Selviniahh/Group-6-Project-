@@ -48,6 +48,13 @@ public class GameController : Controller
         }
         
         ViewData["CurrentFilter"] = searchString;
+        
+        // Find game recommenaations based on the "genre" 
+        var gameRecommendations = await _context.Games
+            .Where (g => g.Genre == game.Genre && g.Id != id)
+            .ToListAsync();
+        // Pass the games to the view
+        ViewBag.gameRecommendations = gameRecommendations;
 
         return View(game);
 
