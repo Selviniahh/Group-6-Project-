@@ -20,9 +20,9 @@ Layout = "_Layout";
     <!-- Success Message -->
     @if (TempData["SuccessMessage"] != null)
     {
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["SuccessMessage"]
-    </div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+        </div>
     }
     
     <form asp-action="SaveProfile" method="post" enctype="multipart/form-data">
@@ -67,6 +67,12 @@ Layout = "_Layout";
         <button type="submit" class="btn btn-primary">Save</button>
         <a asp-action="ChangePassword" asp-controller="User" class="btn btn-link">Change Password</a>
     </form>
+    <br />
+    
+    <!-- Button for friends and family page -->
+    <a asp-controller="User" asp-action="FriendsAndFamilyDetails" asp-route-userId="@ViewBag.UserID" class="btn btn-primary mt-3">
+        View Friends and Family
+    </a>
 </div>
 
 <!-- Client-side validation scripts -->

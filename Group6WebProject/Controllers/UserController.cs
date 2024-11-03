@@ -313,12 +313,12 @@ public class UserController : Controller
             // UserID is not a valid integer
             return BadRequest("Invalid UserID format.");
         }
-
         // Check if the profile exists for the given UserID
         var existingProfile = await _dbContext.Profiles.FirstOrDefaultAsync(u => u.UserId == userId);
 
         if (existingProfile != null)
         {
+            ViewBag.UserID = userId;
             return View(existingProfile);
         }
 
@@ -331,7 +331,7 @@ public class UserController : Controller
             BirthDate = null,
             ReceiveCvgs = false
         };
-
+        ViewBag.UserID = userId; 
         return View(model);
     }
 
@@ -362,5 +362,46 @@ public class UserController : Controller
         return RedirectToAction("Profile"); // Redirect back to the "Profile" action after a successful save
 
         //Test
+        
+        //Friends and family list
+
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> FriendsAndFamilyDetails(int userId)
+    {
+        // Get the user and their friends and family list
+        var user = await _dbContext.Users
+            .Include(u => u.FriendsAndFamily)
+            .FirstOrDefaultAsync(u => u.UserID == userId);
+        
+        // Get list recommended friends
+        var potentialFriends = await _dbContext.Users
+            .Where(u => u.UserID != userId && !user.FriendsAndFamily.Contains(u))
+            .ToListAsync();
+
+        // Show user and recommended friends to the view
+        ViewBag.PotentialFriends = potentialFriends;
+
+        return View(user);
+    }
+
+    // Add friend to friend list
+    [HttpPost]
+    public async Task<IActionResult> AddFriend(int userId, int friendId)
+    {
+        var user = await _dbContext.Users
+            .Include(u => u.FriendsAndFamily)
+            .FirstOrDefaultAsync(u => u.UserID == userId);
+
+        var friend = await _dbContext.Users.FindAsync(friendId);
+
+        if (user != null && friend != null && !user.FriendsAndFamily.Contains(friend))
+        {
+            user.FriendsAndFamily.Add(friend);
+            await _dbContext.SaveChangesAsync();
+        }
+        //return to friends and family details page
+        return RedirectToAction("FriendsAndFamilyDetails", new { userId });
     }
 }

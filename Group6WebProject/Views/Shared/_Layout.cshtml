@@ -30,7 +30,7 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Preferences" asp-action="PreferencesIndex">Preferences</a>
                         </li>
                     }
-
+                    
                     @* Admin page if user logged in as admin *@
                     <li class="nav-item">
                         @if (User.Identity.IsAuthenticated && bool.TryParse(User.FindFirst("IsAdmin")?.Value, out bool isAdmin) && isAdmin)
@@ -64,6 +64,8 @@
 
                 @if (User.Identity.IsAuthenticated)
                 {
+                    //<a asp-controller="User" asp-action="FriendsAndFamilyDetails" asp-route-userId="1" class="nav-link text-dark">Friends and Family (User 1)</a>
+                    // <a asp-controller="User" asp-action="FriendsAndFamilyDetails" asp-route-userId="@ViewBag.UserID">Friends and Family</a>
                     <a asp-action="Index" asp-controller="Address" class="btn btn-link">Address</a>
                 }
             </div>

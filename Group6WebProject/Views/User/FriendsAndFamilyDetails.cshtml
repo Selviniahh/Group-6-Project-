@@ -1,0 +1,70 @@
+@using Group6WebProject.Data
+@model Group6WebProject.Data.User
+
+@{
+    Layout = "_Layout";
+}
+
+<h1 class="mt-4">Friends and Family List</h1>
+
+<!-- Display existing Friends and Family list -->
+<div class="card mt-3 shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h4>Your Friends and Family</h4>
+    </div>
+    <div class="card-body">
+        @if (Model.FriendsAndFamily.Any())
+        {
+            <div class="row">
+                @foreach (var friend in Model.FriendsAndFamily)
+                {
+                    <div class="col-md-4 mb-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">@friend.Name</h5>
+                                <!-- Add more details if available, e.g., friend’s profile or description -->
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p>No friends or family members added yet.</p>
+        }
+    </div>
+</div>
+
+<hr class="my-4" />
+
+<!-- Form to add a new friend or family member -->
+<div class="card mt-3 shadow-sm">
+    <div class="card-header bg-success text-white">
+        <h4>Add a New Friend or Family Member</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="AddFriend" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="userId" value="@Model.UserID" />
+
+            <div class="form-group">
+                <label for="friendId" class="font-weight-bold">Select a Friend</label>
+                <select name="friendId" id="friendId" class="form-control" style="width: 100%; max-width: 400px;">
+                    <option value="">-- Select a User --</option>
+                    @foreach (var potentialFriend in ViewBag.PotentialFriends as List<Group6WebProject.Data.User>)
+                    {
+                        <option value="@potentialFriend.UserID">@potentialFriend.Name</option>
+                    }
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-success mt-3">Add to Friends and Family</button>
+        </form>
+    </div>
+</div>
+
+<!-- Back to Profile link -->
+<div class="mt-4">
+    <a asp-controller="User" asp-action="Profile" class="btn btn-secondary">Back to Profile</a>
+</div>

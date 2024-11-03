@@ -37,4 +37,7 @@ public class User
 
     public const int LockOutTimer = 15;
     public int LockOutCounter = 0;
+    
+    public ICollection<User> FriendsAndFamily { get; set; } = new List<User>();
+
 }
