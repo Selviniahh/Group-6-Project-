@@ -59,4 +59,10 @@ public class GameController : Controller
         return View(game);
 
     }
+    
+    // public async Task<IActionResult> AddGameWishList(int gameId)
+    // {
+    //     return RedirectToAction("AddGameWishList", "WishList", new { gameId });
+    //
+    // }
 }

@@ -30,6 +30,14 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Preferences" asp-action="PreferencesIndex">Preferences</a>
                         </li>
                     }
+
+                    @* WishList page if user logged in *@
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="WishList" asp-action="WishListIndex">Wishlist</a>
+                    </li>
+                    }
                     
                     @* Admin page if user logged in as admin *@
                     <li class="nav-item">

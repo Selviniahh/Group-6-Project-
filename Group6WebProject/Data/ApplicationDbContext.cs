@@ -14,6 +14,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<Event> Events { get; set; }
     public DbSet<Review> Reviews { get; set; }
     public DbSet<Address> Addresses { get; set; }
+    public DbSet<WishlistItem> WishlistItems { get; set; }
+
     
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {

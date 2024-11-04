@@ -1,0 +1,48 @@
+@model List<Group6WebProject.Models.WishlistItem>
+
+@{
+    ViewBag.Title = "WishList";
+    Layout = "_Layout";
+}
+
+<h2>Wish List</h2>
+
+@if (Model==null||!Model.Any())
+{
+    <p>You have no items in your wish list.</p>
+}
+else
+{
+    
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Game Title</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Platform</th>
+            <th>Genre</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Game?.Title</td>
+                <td>@item.Game?.Description</td>
+                <td>@item.Game?.Price</td>
+                <td>@item.Game?.Platform</td>
+                <td>@item.Game?.Genre</td>
+                <td>
+                    @* <a href="@Url.Action("RemoveFromWishList", new { gameId = item.GameId })">Remove</a> *@
+                <form asp-action="RemoveFromWishList" asp-controller="WishList" method="post">
+                    <input type="hidden" name="gameId" value="@item.Game.Id" />
+                    <button type="submit" class="btn btn-primary">Remove</button>
+                </form>
+                </td>
+        </tr>
+        }
+        </tbody>
+    </table>
+}
