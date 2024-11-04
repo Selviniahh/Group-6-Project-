@@ -102,4 +102,38 @@ public class WishListController : Controller
         
         return RedirectToAction("WishListIndex");
     }
+
+    public async Task<IActionResult> ViewFriendWishList(int friendUserId)
+    {
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+        var currUser = await _context.Users
+            .Include(u=>u.FriendsAndFamily)
+            .FirstOrDefaultAsync(u => u.UserID == userId);
+
+        if (currUser == null || !currUser.FriendsAndFamily.Any(f => f.UserID == friendUserId))
+        {
+            TempData["ErrorMessage"] = "You do not have permission.";
+            return RedirectToAction("Profile", "User");
+        }
+
+        var friendUser = await _context.Users
+            .FirstOrDefaultAsync(u => u.UserID == friendUserId);
+
+        var wishlist = await _context.WishlistItems
+            .Include(w => w.Game)
+            .Where(w => w.UserId == friendUserId && w.IsPublic)
+            .ToListAsync();
+
+        if (wishlist == null || !wishlist.Any())
+        {
+            TempData["NoGameMessage"] = friendUser.Name+" has no data in wishlist.";
+            return RedirectToAction("Profile", "User");
+        }
+
+        ViewData["FriendUserId"] = friendUserId;
+        ViewData["FriendName"] = friendUser.Name;
+        ViewData["UserId"] = userId;
+        return View("FriendWishList", wishlist);
+    }
 }

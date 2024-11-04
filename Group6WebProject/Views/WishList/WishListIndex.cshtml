@@ -36,13 +36,26 @@ else
                 <td>@item.Game?.Genre</td>
                 <td>
                     @* <a href="@Url.Action("RemoveFromWishList", new { gameId = item.GameId })">Remove</a> *@
-                <form asp-action="RemoveFromWishList" asp-controller="WishList" method="post">
-                    <input type="hidden" name="gameId" value="@item.Game.Id" />
-                    <button type="submit" class="btn btn-primary">Remove</button>
-                </form>
+                    <form asp-action="RemoveFromWishList" asp-controller="WishList" method="post">
+                        <input type="hidden" name="gameId" value="@item.Game.Id" />
+                        <button type="submit" class="btn btn-primary">Remove</button>
+                    </form>
                 </td>
-        </tr>
+            </tr>
         }
         </tbody>
     </table>
+    
+    <a href="https://www.facebook.com/sharer/sharer.php?u=@Url.Action("WishListIndex", "WishList", new { userId = Model.First().UserId }, "https")"
+       target="_blank" class="btn btn-secondary">
+        Share on Facebook
+    </a>
+
+    <a href="https://twitter.com/intent/tweet?url=@Url.Action("WishListIndex", "WishList", new { userId = Model.First().UserId }, "https")&text=Check out my wish list!"
+       target="_blank" class="btn btn-info">
+        Share on Twitter
+    </a>
+
+    
+    
 }

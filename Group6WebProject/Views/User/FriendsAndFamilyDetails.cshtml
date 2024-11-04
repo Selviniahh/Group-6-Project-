@@ -23,6 +23,9 @@
                             <div class="card-body">
                                 <h5 class="card-title">@friend.Name</h5>
                                 <!-- Add more details if available, e.g., friend’s profile or description -->
+                                <a asp-action="ViewFriendWishList" asp-controller="WishList" asp-route-friendUserId="@friend.UserID" class="btn btn-primary mt-2">
+                                    View Wish List
+                                </a>
                             </div>
                         </div>
                     </div>
