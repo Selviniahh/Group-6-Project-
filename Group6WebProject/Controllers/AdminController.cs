@@ -1,13 +1,13 @@
 ﻿using Group6WebProject.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Group6WebProject.Data;
 using System.Security.Claims;
+using System.Linq;
+using System;
 
 namespace Group6WebProject.Controllers
 {
-    [Authorize]
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _dbContext;
@@ -17,17 +17,25 @@ namespace Group6WebProject.Controllers
             _dbContext = dbContext;
         }
 
+        // Helper method to check if the current user is an Admin
         private bool IsAdmin()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return false;
+            }
+
             if (int.TryParse(userIdClaim, out int userId))
             {
                 var user = _dbContext.Users.Find(userId);
-                return user != null && user.IsAdmin;
+                return user?.IsAdmin ?? false;
             }
+
             return false;
         }
 
+        // Admin Dashboard (Only accessible by admin users)
         public IActionResult Index()
         {
             if (!IsAdmin())
@@ -38,7 +46,7 @@ namespace Group6WebProject.Controllers
             return View();
         }
 
-        // Game Management
+        // Game Management Section
         public IActionResult GameManagement()
         {
             if (!IsAdmin())
@@ -53,24 +61,19 @@ namespace Group6WebProject.Controllers
         [HttpPost]
         public IActionResult AddGame(Game game)
         {
-            if (!IsAdmin())
+            if (ModelState.IsValid)
             {
-                return Forbid();
+                _dbContext.Games.Add(game);
+                _dbContext.SaveChanges();
+                TempData["SuccessMessage"] = "Game added successfully!";
+                return RedirectToAction("GameManagement");
             }
 
-            _dbContext.Games.Add(game);
-            _dbContext.SaveChanges();
-            return RedirectToAction("GameManagement");
+            return View(game);
         }
 
-        // Edit Game
         public IActionResult EditGame(int id)
         {
-            if (!IsAdmin())
-            {
-                return Forbid();
-            }
-
             var game = _dbContext.Games.Find(id);
             if (game == null)
             {
@@ -83,21 +86,17 @@ namespace Group6WebProject.Controllers
         [HttpPost]
         public IActionResult EditGame(Game game)
         {
-            if (!IsAdmin())
-            {
-                return Forbid();
-            }
-
             if (ModelState.IsValid)
             {
                 _dbContext.Games.Update(game);
                 _dbContext.SaveChanges();
+                TempData["SuccessMessage"] = "Game updated successfully!";
                 return RedirectToAction("GameManagement");
             }
+
             return View(game);
         }
 
-        // Delete Game
         public IActionResult DeleteGame(int id)
         {
             if (!IsAdmin())
@@ -114,7 +113,7 @@ namespace Group6WebProject.Controllers
             return View(game);
         }
 
-        [HttpPost,]
+        [HttpPost]
         public IActionResult DeleteGameConfirmed(int id)
         {
             if (!IsAdmin())
@@ -126,12 +125,18 @@ namespace Group6WebProject.Controllers
             if (game != null)
             {
                 _dbContext.Games.Remove(game);
-                _dbContext.SaveChanges(); // Persist changes to the database
+                _dbContext.SaveChanges();
+                TempData["SuccessMessage"] = "Game deleted successfully!";
             }
-            return RedirectToAction("GameManagement"); // Redirect back to the Game Management page
+            else
+            {
+                TempData["ErrorMessage"] = "Game not found!";
+            }
+
+            return RedirectToAction("GameManagement");
         }
 
-        // Event Management
+        // Event Management Section
         public IActionResult EventManagement()
         {
             if (!IsAdmin())
@@ -139,7 +144,7 @@ namespace Group6WebProject.Controllers
                 return Forbid();
             }
 
-            var events = _dbContext.Set<Event>().ToList();
+            var events = _dbContext.Events.ToList();
             return View(events);
         }
 
@@ -151,89 +156,160 @@ namespace Group6WebProject.Controllers
                 return Forbid();
             }
 
-            _dbContext.Events.Add(eventItem);
-            _dbContext.SaveChanges();
-            return RedirectToAction("EventManagement");
+            if (ModelState.IsValid)
+            {
+                _dbContext.Events.Add(eventItem);
+                _dbContext.SaveChanges();
+                TempData["SuccessMessage"] = "Event added successfully!";
+                return RedirectToAction("EventManagement");
+            }
+
+            return View(eventItem);
         }
-        // GET: Display Edit Event Form
-public IActionResult EditEvent(int id)
-{
-    var eventItem = _dbContext.Events.Find(id);
-    if (eventItem == null)
-    {
-        return NotFound();
-    }
 
-    return View(eventItem);
-}
-
-// POST: Edit Event
-[HttpPost]
-public IActionResult EditEvent(Event eventItem)
-{
-    if (ModelState.IsValid)
-    {
-        _dbContext.Events.Update(eventItem);
-        _dbContext.SaveChanges();
-        TempData["SuccessMessage"] = "Event updated successfully!";
-        return RedirectToAction("EventManagement");
-    }
-
-    return View(eventItem); // Return to the view if validation fails
-}
-// GET: Display Delete Event Confirmation
-public IActionResult DeleteEvent(int id)
-{
-    var eventItem = _dbContext.Events.Find(id);
-    if (eventItem == null)
-    {
-        return NotFound();
-    }
-
-    return View(eventItem);
-}
-
-// POST: Delete Event Confirmed
-[HttpPost]
-public IActionResult DeleteEventConfirmed(int id)
-{
-    var eventItem = _dbContext.Events.Find(id);
-    if (eventItem != null)
-    {
-        _dbContext.Events.Remove(eventItem);
-        _dbContext.SaveChanges();
-      
-    }
-
-    return RedirectToAction("EventManagement");
-}
-
-
-        // Game Reviews
-        public IActionResult GameReviews()
+        public IActionResult EditEvent(int id)
         {
             if (!IsAdmin())
             {
                 return Forbid();
             }
 
-            var reviews = _dbContext.Set<Review>().ToList();
-            return View(reviews);
+            var eventItem = _dbContext.Events.Find(id);
+            if (eventItem == null)
+            {
+                return NotFound();
+            }
+
+            return View(eventItem);
         }
 
         [HttpPost]
-        public IActionResult AddReview(Review review)
+        public IActionResult EditEvent(Event eventItem)
+        {
+            if (ModelState.IsValid)
+            {
+                _dbContext.Events.Update(eventItem);
+                _dbContext.SaveChanges();
+                TempData["SuccessMessage"] = "Event updated successfully!";
+                return RedirectToAction("EventManagement");
+            }
+
+            return View(eventItem);
+        }
+
+        public IActionResult DeleteEvent(int id)
         {
             if (!IsAdmin())
             {
                 return Forbid();
             }
 
-            _dbContext.Reviews.Add(review);
-            _dbContext.SaveChanges();
-            return RedirectToAction("GameReviews");
+            var eventItem = _dbContext.Events.Find(id);
+            if (eventItem == null)
+            {
+                return NotFound();
+            }
+
+            return View(eventItem);
         }
 
-       
+        [HttpPost]
+        public IActionResult DeleteEventConfirmed(int id)
+        {
+            if (!IsAdmin())
+            {
+                return Forbid();
+            }
+
+            var eventItem = _dbContext.Events.Find(id);
+            if (eventItem != null)
+            {
+                _dbContext.Events.Remove(eventItem);
+                _dbContext.SaveChanges();
+                TempData["SuccessMessage"] = "Event deleted successfully!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Event not found!";
+            }
+
+            return RedirectToAction("EventManagement");
+        }
+
+        public IActionResult ApproveReview(int reviewId)
+        {
+            var review = _dbContext.Reviews.Find(reviewId);
+            if (review == null)
+            {
+                return NotFound();
+            }
+
+            return View("ReviewManagement");
+        }
+
+        [HttpPost]
+        public IActionResult ApproveReviewConfirmed(int reviewId)
+        {
+            var review = _dbContext.Reviews.Find(reviewId);
+            if (review == null)
+            {
+                return NotFound();
+            }
+
+            review.ReviewStatus = "Approved";
+            review.ApprovalDate = DateTime.Now;
+
+            _dbContext.Reviews.Update(review);
+            _dbContext.SaveChanges();
+
+            TempData["SuccessMessage"] = "Review has been approved!";
+            return RedirectToAction("ReviewManagement");
+        }
+
+        public IActionResult RejectReview(int reviewId)
+        {
+            var review = _dbContext.Reviews.Find(reviewId);
+            if (review == null)
+            {
+                return NotFound();
+            }
+
+            return View("ReviewManagement");
+        }
+
+        [HttpPost]
+        public IActionResult RejectReviewConfirmed(int reviewId)
+        {
+            var review = _dbContext.Reviews.Find(reviewId);
+            if (review == null)
+            {
+                return NotFound();
+            }
+
+            review.ReviewStatus = "Rejected";
+            review.ApprovalDate = DateTime.Now;
+
+            _dbContext.Reviews.Update(review);
+            _dbContext.SaveChanges();
+
+            TempData["ErrorMessage"] = "Review has been rejected!";
+            return RedirectToAction("ReviewManagement");
+        }
+
+        public IActionResult ReviewManagement()
+        {
+            if (!IsAdmin())
+            {
+                return Forbid();
+            }
+
+            var pendingReviews = _dbContext.Reviews
+                .Where(r => r.ReviewStatus == "Pending")
+                .Include(r => r.Game)
+                .Include(r => r.User)
+                .ToList();
+
+            return View(pendingReviews);
+        }
     }
 }

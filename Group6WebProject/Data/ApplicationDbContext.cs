@@ -12,7 +12,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<Profile> Profiles { get; set; }
     public DbSet<Game> Games { get; set; }
     public DbSet<Event> Events { get; set; }
-    public DbSet<Review> Reviews { get; set; }
+    public DbSet<GameReview> Reviews { get; set; }
+    public DbSet<GameRating> Ratings { get; set; }
     public DbSet<Address> Addresses { get; set; }
     
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
@@ -99,3 +100,4 @@ public class ApplicationDbContext : DbContext
         );
     }
 }
+
