@@ -257,7 +257,6 @@ namespace Group6WebProject.Controllers
             }
 
             review.ReviewStatus = "Approved";
-            review.ApprovalDate = DateTime.Now;
 
             _dbContext.Reviews.Update(review);
             _dbContext.SaveChanges();
@@ -287,7 +286,7 @@ namespace Group6WebProject.Controllers
             }
 
             review.ReviewStatus = "Rejected";
-            review.ApprovalDate = DateTime.Now;
+          
 
             _dbContext.Reviews.Update(review);
             _dbContext.SaveChanges();

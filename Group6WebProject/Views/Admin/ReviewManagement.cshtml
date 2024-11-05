@@ -31,9 +31,17 @@
                 <td>
                     @if (review.ReviewStatus == "Pending")
                     {
-                        <a href="@Url.Action("ApproveReviewConfirmed", "Admin", new { reviewId = review.GameReviewID })" class="btn btn-success">Approve</a>
-                        <a href="@Url.Action("RejectReviewConfirmed", "Admin", new { reviewId = review.GameReviewID })" class="btn btn-danger">Reject</a>
+                        <form asp-action="ApproveReviewConfirmed" asp-controller="Admin" method="post" style="display:inline;">
+                            <input type="hidden" name="reviewId" value="@review.GameReviewID" />
+                            <button type="submit" class="btn btn-success">Approve</button>
+                        </form>
+    
+                        <form asp-action="RejectReviewConfirmed" asp-controller="Admin" method="post" style="display:inline;">
+                            <input type="hidden" name="reviewId" value="@review.GameReviewID" />
+                            <button type="submit" class="btn btn-danger">Reject</button>
+                        </form>
                     }
+
                     else
                     {
                         <span class="text-muted">N/A</span>

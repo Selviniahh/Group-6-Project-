@@ -1,7 +1,7 @@
 @model Group6WebProject.Models.Game
 
 @{
-ViewData["Title"] = "Game Details";
+    ViewData["Title"] = "Game Details";
 }
 
 <h2>@Model.Title</h2>
@@ -13,29 +13,42 @@ ViewData["Title"] = "Game Details";
     <h4>Description:</h4> <p>@Model.Description</p>
     <h4>Price:</h4> <p>@Model.Price</p>
     <h3>Average Rating: @ViewBag.AverageRating</h3>
+    
     <p>
         <strong>Rate this game:</strong>
-    <form method="post" asp-action="RateGame">
-        <input type="hidden" name="gameId" value="@Model.Id" />
-        <select name="rating">
-            <option value="1">1 Star</option>
-            <option value="2">2 Stars</option>
-            <option value="3">3 Stars</option>
-            <option value="4">4 Stars</option>
-            <option value="5">5 Stars</option>
-        </select>
-        <button type="submit">Submit Rating</button>
-    </form>
+        <form method="post" asp-action="RateGame">
+            <input type="hidden" name="gameId" value="@Model.Id" />
+            <select name="rating">
+                <option value="1">1 Star</option>
+                <option value="2">2 Stars</option>
+                <option value="3">3 Stars</option>
+                <option value="4">4 Stars</option>
+                <option value="5">5 Stars</option>
+            </select>
+            <button type="submit">Submit Rating</button>
+        </form>
     </p>
 
     <!-- Display game reviews -->
     <h3>Reviews</h3>
     @foreach (var review in Model.Reviews.Where(r => r.ReviewStatus == "Approved"))
     {
-    <div class="review">
-        <p><strong>@review.User.Name</strong> - @review.SubmissionDate.ToString("yyyy-MM-dd")</p>
-        <p>@review.ReviewText</p>
-    </div>
+        <div class="review">
+            <p>
+                <strong>
+                    @if (review.User?.Name != null)
+                    {
+                        @review.User.Name
+                    }
+                    else
+                    {
+                        @review.UserID
+                    }
+                </strong> 
+                - @review.SubmissionDate.ToString("yyyy-MM-dd")
+            </p>
+            <p>@review.ReviewText</p>
+        </div>
     }
 
     <!-- Submit a review -->

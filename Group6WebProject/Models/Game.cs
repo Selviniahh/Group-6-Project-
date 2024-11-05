@@ -11,9 +11,8 @@ public class Game
     public string Platform{ get; set; }
     public ICollection<GameReview> Reviews { get; set; } 
     public ICollection<GameRating> Ratings { get; set; } 
-    public double AverageRating(List<GameRating> ratings)
-    {
-        if (ratings.Count == 0) return 0;
-        return ratings.Average(r => r.Rating);
-    }
+    public double AverageRating()
+        {
+            return Ratings.Any() ? Ratings.Average(r => r.Rating) : 0;
+        }
 }

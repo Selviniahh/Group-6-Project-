@@ -10,7 +10,7 @@ namespace Group6WebProject.Models
         public string ReviewText { get; set; }
         public string ReviewStatus { get; set; } = "Pending"; // Default to "Pending"
         public DateTime SubmissionDate { get; set; } = DateTime.Now;
-        public DateTime? ApprovalDate { get; set; }
+       
 
         // Navigation properties
         public User User { get; set; }
