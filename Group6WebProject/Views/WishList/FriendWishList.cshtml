@@ -1,0 +1,46 @@
+@model List<Group6WebProject.Models.WishlistItem>
+
+@{
+    ViewBag.Title = "Friend's WishList";
+    Layout = "_Layout";
+}
+
+<a asp-action="FriendsAndFamilyDetails" asp-controller="User" asp-route-userId="@ViewData["UserId"]" class="btn btn-secondary mb-3">
+    Back to Friends and Family List
+</a>
+
+<h2>@ViewData["FriendName"]'s Wish List</h2>
+
+@if (Model==null||!Model.Any())
+{
+    <p>@ViewData["FriendName"] has no items in your wish list.</p>
+}
+else
+{
+    
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Game Title</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Platform</th>
+            <th>Genre</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Game?.Title</td>
+                <td>@item.Game?.Description</td>
+                <td>@item.Game?.Price</td>
+                <td>@item.Game?.Platform</td>
+                <td>@item.Game?.Genre</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    
+    
+}

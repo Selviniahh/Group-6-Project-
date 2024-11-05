@@ -33,6 +33,11 @@
             <td>@game.ReleaseDate.ToString("yyyy-MM-dd")</td>
             <td>
                 <a asp-action="Details" asp-route-id="@game.Id" asp-route-searchString="@ViewData["CurrentFilter"]" class="btn btn-info">Details</a>
+                <form asp-action="AddGameWishList" asp-controller="WishList" method="post">
+                    <input type="hidden" name="gameId" value="@game.Id" />
+                    <button type="submit" class="btn btn-primary">Add To Wishlist</button>
+                </form>
+
             </td>
         </tr>
     }

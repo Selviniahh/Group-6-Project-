@@ -15,6 +15,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<GameReview> Reviews { get; set; }
     public DbSet<GameRating> Ratings { get; set; }
     public DbSet<Address> Addresses { get; set; }
+    public DbSet<WishlistItem> WishlistItems { get; set; }
+
     
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
