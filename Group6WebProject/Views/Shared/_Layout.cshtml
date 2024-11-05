@@ -23,59 +23,40 @@
                         <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                     </li>
 
-                    @* Preferences page if user logged in *@
                     @if (User.Identity.IsAuthenticated)
                     {
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Preferences" asp-action="PreferencesIndex">Preferences</a>
-                        </li>
-                    }
-
-                    @* WishList page if user logged in *@
-                    @if (User.Identity.IsAuthenticated)
-                    {
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Preferences" asp-action="PreferencesIndex">Preferences</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link text-dark" asp-area="" asp-controller="WishList" asp-action="WishListIndex">Wishlist</a>
                     </li>
                     }
-                    
-                    @* Admin page if user logged in as admin *@
-                    <li class="nav-item">
-                        @if (User.Identity.IsAuthenticated && bool.TryParse(User.FindFirst("IsAdmin")?.Value, out bool isAdmin) && isAdmin)
-                        {
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Admin </a>
-                        }
-                    </li>
 
-                    @* Game page no user logging in required to search a game *@
+                    @if (User.Identity.IsAuthenticated && bool.TryParse(User.FindFirst("IsAdmin")?.Value, out bool isAdmin) && isAdmin)
+                    {
                     <li class="nav-item">
-                        <a class="nav-link text-dark" asp-controller="Admin" asp-action="Index">Admin</a>
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Admin</a>
                     </li>
+                    }
 
                 </ul>
 
-                @* If user is authenticated, display a greeting message and a logout button, otherwise display login and register buttons. *@
                 @if (User.Identity.IsAuthenticated)
                 {
-                    <form asp-action="Logout" asp-controller="User" method="post" class="form-inline">
-                        <span class="navbar-text mr-2">Hello, @User.Identity.Name</span>
-                        <button type="submit" class="btn btn-link">Logout</button>
-                    </form>
+                <form asp-action="Logout" asp-controller="User" method="post" class="form-inline">
+                    <span class="navbar-text mr-2">Hello, @User.Identity.Name</span>
+                    <button type="submit" class="btn btn-link">Logout</button>
+                </form>
 
-                    <a asp-action="Profile" asp-controller="User" class="btn btn-link">Profile</a>
+                <a asp-action="Profile" asp-controller="User" class="btn btn-link">Profile</a>
                 }
                 else
                 {
-                    <a class="nav-link text-dark" asp-controller="User" asp-action="Login">Login</a>
-                    <a class="nav-link text-dark" asp-controller="User" asp-action="Register">Register</a>
+                <a class="nav-link text-dark" asp-controller="User" asp-action="Login">Login</a>
+                <a class="nav-link text-dark" asp-controller="User" asp-action="Register">Register</a>
                 }
 
-                @if (User.Identity.IsAuthenticated)
-                {
-                    //<a asp-controller="User" asp-action="FriendsAndFamilyDetails" asp-route-userId="1" class="nav-link text-dark">Friends and Family (User 1)</a>
-                    // <a asp-controller="User" asp-action="FriendsAndFamilyDetails" asp-route-userId="@ViewBag.UserID">Friends and Family</a>
-                    <a asp-action="Index" asp-controller="Address" class="btn btn-link">Address</a>
-                }
             </div>
         </div>
     </nav>

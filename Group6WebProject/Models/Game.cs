@@ -9,6 +9,8 @@ public class Game
     public string Genre { get; set; }
     public string Price { get; set; }
     public string Platform{ get; set; }
+    
+    
     public ICollection<GameReview> Reviews { get; set; } 
     public ICollection<GameRating> Ratings { get; set; } 
     public double AverageRating()
