@@ -50,6 +50,7 @@ namespace Group6WebProject.Controllers
             var game = await _context.Games
                 .Include(g => g.Ratings) // Include ratings
                 .Include(g => g.Reviews) // Include reviews
+                .ThenInclude(r => r.User)
                 .FirstOrDefaultAsync(g => g.Id == id);
 
             if (game == null)
