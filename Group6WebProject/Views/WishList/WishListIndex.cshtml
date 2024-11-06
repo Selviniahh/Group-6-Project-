@@ -7,6 +7,10 @@
 
 <h2>Wish List</h2>
 
+<a asp-action="Index" asp-controller="Game" class="btn btn-secondary mb-3">
+    Back to Games
+</a>
+
 @if (Model==null||!Model.Any())
 {
     <p>You have no items in your wish list.</p>
@@ -55,7 +59,8 @@ else
        target="_blank" class="btn btn-info">
         Share on Twitter
     </a>
-
+    
+    
     
     
 }

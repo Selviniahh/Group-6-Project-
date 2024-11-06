@@ -29,7 +29,7 @@ public class WishListController : Controller
             if (wishList == null || !wishList.Any())
             {
                 TempData["NoGameMessage"] = "There is no game selected.";
-                return RedirectToAction("Index","Game");
+                //return RedirectToAction("Index","Game");
             }
         
         return View(wishList);
@@ -128,7 +128,7 @@ public class WishListController : Controller
         if (wishlist == null || !wishlist.Any())
         {
             TempData["NoGameMessage"] = friendUser.Name+" has no data in wishlist.";
-            return RedirectToAction("Profile", "User");
+            //return RedirectToAction("Profile", "User");
         }
 
         ViewData["FriendUserId"] = friendUserId;
