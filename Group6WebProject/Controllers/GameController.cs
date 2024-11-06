@@ -76,7 +76,7 @@ namespace Group6WebProject.Controllers
 
             return View(game);
         }
-
+        
         // POST: /Game/RateGame
         [HttpPost]
         public async Task<IActionResult> RateGame(int gameId, int rating)
@@ -94,25 +94,31 @@ namespace Group6WebProject.Controllers
 
             var userId = int.Parse(userIdClaim);
 
-            // Check if the rating already exists for this user
+            // Check if the user has already rated this game
             var existingRating = await _context.Ratings
                 .FirstOrDefaultAsync(r => r.UserID == userId && r.GameID == gameId);
 
             if (existingRating != null)
             {
-                // Instead of updating, do nothing or notify the user they can only rate once per game
-                TempData["ErrorMessage"] = "You have already rated this game!";
-                return RedirectToAction("Details", new { id = gameId });
+                // Update the existing rating
+                existingRating.Rating = rating;
+                _context.Ratings.Update(existingRating);
+                TempData["SuccessMessage"] = "Your rating has been updated!";
+            }
+            else
+            {
+                // Add the new rating if no existing rating
+                var newRating = new GameRating
+                {
+                    UserID = userId,
+                    GameID = gameId,
+                    Rating = rating
+                };
+                _context.Ratings.Add(newRating);
+                TempData["SuccessMessage"] = "Your rating has been submitted!";
             }
 
-            // Add the new rating
-            var newRating = new GameRating
-            {
-                UserID = userId,
-                GameID = gameId,
-                Rating = rating
-            };
-            _context.Ratings.Add(newRating);
+            // Save changes to the database
             await _context.SaveChangesAsync();
 
             // Now, calculate the average rating for the game
@@ -122,12 +128,17 @@ namespace Group6WebProject.Controllers
 
             if (game != null)
             {
-                // Calculate the new average rating after the new rating has been added
-                ViewBag.AverageRating = game.AverageRating(); // Call the AverageRating method to calculate it
+                // Calculate the new average rating after the new or updated rating has been added
+                double averageRating = 0;
+                if (game.Ratings.Any())
+                {
+                    averageRating = game.Ratings.Average(r => r.Rating);
+                }
+
+                ViewBag.AverageRating = averageRating;
             }
 
             // Redirect to the details page where the updated average rating will be shown
-            TempData["SuccessMessage"] = "Your rating has been successfully submitted!";
             return RedirectToAction("Details", new { id = gameId });
         }
 
