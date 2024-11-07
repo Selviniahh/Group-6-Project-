@@ -70,24 +70,27 @@ namespace Group6WebProject.Controllers
             var game = _dbContext.Games.Find(id);
             if (game == null)
             {
+                Console.WriteLine("Game not found");
                 return NotFound();
             }
             return View(game);
         }
 
+// POST: Admin/EditGame
         [HttpPost]
         public IActionResult EditGame(Game game)
         {
+            ModelState.Remove("Reviews");
+            ModelState.Remove("Ratings");
+
             if (ModelState.IsValid)
             {
                 _dbContext.Games.Update(game);
                 _dbContext.SaveChanges();
                 return RedirectToAction("GameManagement");
             }
-            return View(game);
+            return View(game); // Return the view with the model if validation fails
         }
-
-
 
         // Delete Game
         public IActionResult DeleteGame(int id)
