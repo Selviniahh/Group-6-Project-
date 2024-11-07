@@ -16,7 +16,7 @@ namespace Group6WebProject.Controllers
             _dbContext = dbContext;
         }
 
-        private bool IsAdmin()
+        public bool IsAdmin()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (int.TryParse(userIdClaim, out int userId))
