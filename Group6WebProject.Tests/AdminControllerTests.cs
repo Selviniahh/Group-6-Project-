@@ -76,7 +76,8 @@ namespace Group6WebProject.Tests
                 Genre = "RPG",
                 Price = "$49.99",
                 Platform = "Xbox",
-                ReleaseDate = new DateTime(2024, 1, 1)
+                ReleaseDate = new DateTime(2024, 1, 1),
+                DownloadUrl = "https://github.com/user-attachments/files/17656884/Pathfinding.zip"
             };
 
             // Act: Add the new game using the controller method
