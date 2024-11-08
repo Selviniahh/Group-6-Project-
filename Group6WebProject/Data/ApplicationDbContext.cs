@@ -16,7 +16,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<GameRating> Ratings { get; set; }
     public DbSet<Address> Addresses { get; set; }
     public DbSet<WishlistItem> WishlistItems { get; set; }
-    
+
     public DbSet<EventRegister> EventRegister { get; set; }
 
     public DbSet<Cart> Carts { get; set; }
@@ -99,32 +99,46 @@ public class ApplicationDbContext : DbContext
             new Game
             {
                 Id = 1,
-                Title = "Game One",
-                Description = "First Game",
+                Title = "Pathfinding Game",
+                Description = "A Fun game to test and play pathfinding with adding obstacles",
                 Genre = "Action",
                 Price = "$19.99",
-                Platform = "PC",
-                ReleaseDate = new DateTime(2021, 1, 1)
+                Platform = "Windows",
+                ReleaseDate = new DateTime(2023, 1, 1),
+                DownloadUrl = "https://github.com/user-attachments/files/17656884/Pathfinding.zip"
             },
             new Game
             {
                 Id = 2,
-                Title = "Game Two",
-                Description = "Second Game",
+                Title = "Enter The Gungeon",
+                Description = "This is a simple shooter game trying to kill bullet mans.",
                 Genre = "Adventure",
                 Price = "$29.99",
-                Platform = "PlayStation",
-                ReleaseDate = new DateTime(2021, 6, 1)
+                Platform = "Windows",
+                ReleaseDate = new DateTime(2023, 2, 2),
+                DownloadUrl = "https://github.com/user-attachments/files/17656885/ETG.zip"
             },
             new Game
             {
                 Id = 3,
-                Title = "Game Three",
-                Description = "Third Game",
+                Title = "Tile Map Game",
+                Description = "Generate Tile maps selecting from right toolbar and drawing on tile map",
                 Genre = "Action",
-                Price = "$19.99",
-                Platform = "PC",
-                ReleaseDate = new DateTime(2023, 1, 1)
+                Price = "$9.99",
+                Platform = "Windows",
+                ReleaseDate = new DateTime(2023, 3, 3),
+                DownloadUrl = "https://github.com/user-attachments/files/17656888/TileMap.zip"
+            },
+            new Game
+            {
+                Id = 4,
+                Title = "Draw Circle Game",
+                Description = "Draw circles, have fun with watching all the balls bouncing with each other and walls, from the right toolbar experiment with other simple physic options and have fun",
+                Genre = "Action",
+                Price = "$0.00",
+                Platform = "Windows",
+                ReleaseDate = new DateTime(2023, 4, 4),
+                DownloadUrl = "https://github.com/user-attachments/files/17657333/DrawCircle.zip"
             }
         );
     }

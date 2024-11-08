@@ -1,89 +1,66 @@
-@model Group6WebProject.Models.Game
+@model Group6WebProject.Models.GameDetailsViewModel
 
 @{
-    ViewData["Title"] = "Game Details";
+ViewData["Title"] = Model.Game.Title;
 }
 
-<h2>@Model.Title</h2>
+<h2>@Model.Game.Title</h2>
 
-<div>
-    <h4>Genre:</h4> <p>@Model.Genre</p>
-    <h4>Platform:</h4> <p>@Model.Platform</p>
-    <h4>Release Date:</h4> <p>@Model.ReleaseDate.ToString("yyyy-MM-dd")</p>
-    <h4>Description:</h4> <p>@Model.Description</p>
-    <h4>Price:</h4> <p>@Model.Price</p>
-    <h3>Average Rating: @ViewBag.AverageRating</h3>
-    
-    <p>
-        <strong>Rate this game:</strong>
-        <form method="post" asp-action="RateGame">
-            <input type="hidden" name="gameId" value="@Model.Id" />
-            <select name="rating">
-                <option value="1">1 Star</option>
-                <option value="2">2 Stars</option>
-                <option value="3">3 Stars</option>
-                <option value="4">4 Stars</option>
-                <option value="5">5 Stars</option>
-            </select>
-            <button type="submit">Submit Rating</button>
-        </form>
-    </p>
+<p>@Model.Game.Description</p>
+<p>Genre: @Model.Game.Genre</p>
+<p>Platform: @Model.Game.Platform</p>
+<p>Release Date: @Model.Game.ReleaseDate.ToShortDateString()</p>
+<p>Price: @Model.Game.Price</p>
 
-    <!-- Display game reviews -->
-    <h3>Reviews</h3>
-    @foreach (var review in Model.Reviews.Where(r => r.ReviewStatus == "Approved"))
-    {
-        <div class="review">
-            <p>
-                <strong>
-                    @if (review.User?.Name != null)
-                    {
-                        @review.User.Name
-                    }
-                    else
-                    {
-                        @review.UserID
-                    }
-                </strong> 
-                - @review.SubmissionDate.ToString("yyyy-MM-dd")
-            </p>
-            <p>@review.ReviewText</p>
-        </div>
-    }
+<!-- Display average rating -->
+<p>Average Rating: @Model.AverageRating.ToString("0.0") / 5</p>
 
-    <!-- Submit a review -->
-    <h3>Write a Review</h3>
-    <form method="post" asp-action="ReviewGame">
-        <input type="hidden" name="gameId" value="@Model.Id" />
-        <textarea name="reviewText" rows="4" cols="50"></textarea><br />
-        <button type="submit">Submit Review</button>
-    </form>
-</div>
-<hr />
+<!-- Existing code for ratings, reviews, etc. -->
 
-<h4>Recommended Games: </h4>
-@if (ViewBag.gameRecommendations != null && ((List<Game>)ViewBag.gameRecommendations).Any())
+<!-- Display download or purchase options -->
+@if (User.Identity.IsAuthenticated)
 {
-    <div class="row">
-        @foreach (var gameRecommendation in (List<Game>)ViewBag.gameRecommendations)
-        {
-            <div class="col-md-3">
-                <div class="card mb-4 shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            <a asp-controller="Game" asp-action="Details" asp-route-id="@gameRecommendation.Id">
-                                @gameRecommendation.Title
-                            </a>
-                        </h5>
-                        <p class="card-text">Platform: @gameRecommendation.Platform</p>
-                        <p class="card-text">Price: @gameRecommendation.Price</p>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
+if (Model.IsFree || Model.HasPurchased)
+{
+<a asp-action="Download" asp-route-id="@Model.Game.Id" class="btn btn-primary">Download Game</a>
 }
 else
 {
-    <p>No recommended games found.</p>
+<p>You need to purchase this game to download it.</p>
+<!-- Add a button to purchase the game or add it to the cart -->
+<form asp-action="AddToCart" asp-controller="Cart" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="gameId" value="@Model.Game.Id" />
+    <button type="submit" class="btn btn-success">Add to Cart</button>
+</form>
 }
+}
+else
+{
+<p>Please <a asp-controller="User" asp-action="Login">log in</a> to download or purchase this game.</p>
+}
+
+<!-- Display any success or error messages -->
+@if (TempData["SuccessMessage"] != null)
+{
+<div class="alert alert-success">
+    @TempData["SuccessMessage"]
+</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+<div class="alert alert-danger">
+    @TempData["ErrorMessage"]
+</div>
+}
+
+<!-- Display game recommendations -->
+<h3>Recommended Games</h3>
+<ul>
+    @foreach (var recommendedGame in Model.GameRecommendations)
+    {
+    <li>
+        <a asp-action="Details" asp-route-id="@recommendedGame.Id">@recommendedGame.Title</a>
+    </li>
+    }
+</ul>

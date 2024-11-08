@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Group6WebProject.Controllers
 {
@@ -30,7 +31,7 @@ namespace Group6WebProject.Controllers
             // Sanitize the search string to prevent SQL injection attacks
             var sanitizedSearchString = searchString.Trim();
 
-            // Use EF.Functions.Like for case-insensitive search
+            // make case-insensitive search with EF core
             var games = _context.Games.Where(s =>
                 EF.Functions.Like(s.Title, $"%{sanitizedSearchString}%") ||
                 EF.Functions.Like(s.Description, $"%{sanitizedSearchString}%") ||
@@ -50,11 +51,12 @@ namespace Group6WebProject.Controllers
         }
 
         // GET: /Game/Details/{id}
+        // GET: /Game/Details/{id}
         public async Task<IActionResult> Details(int id)
         {
             var game = await _context.Games
-                .Include(g => g.Ratings) // Include ratings
-                .Include(g => g.Reviews) // Include reviews
+                .Include(g => g.Ratings)
+                .Include(g => g.Reviews)
                 .ThenInclude(r => r.User)
                 .FirstOrDefaultAsync(g => g.Id == id);
 
@@ -75,26 +77,49 @@ namespace Group6WebProject.Controllers
                 .Where(g => g.Genre == game.Genre && g.Id != id)
                 .ToListAsync();
 
-            // Pass the data to the view
-            ViewBag.GameRecommendations = gameRecommendations;
-            ViewBag.AverageRating = averageRating;
+            // Determine if the user has purchased the game
+            bool hasPurchased = false;
+            bool isFree = game.Price == "$0.00" || game.Price == "$0";
 
-            return View(game);
+            if (User.Identity.IsAuthenticated)
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!string.IsNullOrEmpty(userIdClaim))
+                {
+                    var userId = int.Parse(userIdClaim);
+
+                    hasPurchased = await _context.Orders
+                        .Include(o => o.OrderItems)
+                        .AnyAsync(o => o.UserID == userId && o.OrderItems.Any(oi => oi.GameID == id));
+                }
+            }
+
+            // Create a view model to pass data to the view
+            var viewModel = new GameDetailsViewModel
+            {
+                Game = game,
+                AverageRating = averageRating,
+                GameRecommendations = gameRecommendations,
+                HasPurchased = hasPurchased,
+                IsFree = isFree
+            };
+
+            return View(viewModel);
         }
-        
+
         // POST: /Game/RateGame
         [HttpPost]
         public async Task<IActionResult> RateGame(int gameId, int rating)
         {
             if (!User.Identity.IsAuthenticated)
             {
-                return Unauthorized(); // Ensure the user is authenticated
+                return Unauthorized();
             }
 
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdClaim))
             {
-                return Unauthorized(); // If user ID claim is not available, return Unauthorized
+                return Unauthorized();
             }
 
             var userId = int.Parse(userIdClaim);
@@ -177,6 +202,52 @@ namespace Group6WebProject.Controllers
 
             TempData["SuccessMessage"] = "Your review has been submitted and is awaiting approval!";
             return RedirectToAction("Details", new { id = gameId });
+        }
+
+        [Authorize]
+        public async Task<IActionResult> Download(int id)
+        {
+            var game = await _context.Games.FindAsync(id);
+            if (game == null)
+            {
+                return NotFound();
+            }
+
+            // Check if the game is free or if the user has purchased it
+            if (IsGameFree(game) || await HasUserPurchasedGame(id))
+            {
+                // Redirect to the download URL
+                return Redirect(game.DownloadUrl);
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "You do not have access to download this game.";
+                return RedirectToAction("Details", new { id = id });
+            }
+        }
+
+        private bool IsGameFree(Game game)
+        {
+            // Assuming that a price of "$0.00" or "$0" indicates a free game
+            return game.Price == "$0.00" || game.Price == "$0";
+        }
+
+        private async Task<bool> HasUserPurchasedGame(int gameId)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return false;
+            }
+
+            var userId = int.Parse(userIdClaim);
+
+            // Check if the user has an order that includes this game
+            var hasPurchased = await _context.Orders
+                .Include(o => o.OrderItems)
+                .AnyAsync(o => o.UserID == userId && o.OrderItems.Any(oi => oi.GameID == gameId));
+
+            return hasPurchased;
         }
     }
 }
