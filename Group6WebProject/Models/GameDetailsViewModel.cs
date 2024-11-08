@@ -10,4 +10,5 @@ namespace Group6WebProject.Models
         public bool HasPurchased { get; set; }
         public bool IsFree { get; set; }
     }
+
 }

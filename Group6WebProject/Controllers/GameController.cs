@@ -51,7 +51,6 @@ namespace Group6WebProject.Controllers
         }
 
         // GET: /Game/Details/{id}
-        // GET: /Game/Details/{id}
         public async Task<IActionResult> Details(int id)
         {
             var game = await _context.Games

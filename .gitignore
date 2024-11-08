@@ -12,12 +12,10 @@ node_modules/
 *.tmp
 *.temp
 *.js.map
-.env
 .vscode/
 .vs/
 *.vcxproj.user
 *.vcxproj.filters
-.env
 Group6WebProject/Migrations
 Migrations/
 Group6WebProject/app.db
