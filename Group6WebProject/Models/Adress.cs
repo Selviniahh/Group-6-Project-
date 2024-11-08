@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Group6WebProject.Data;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace Group6WebProject.Models
 {
@@ -13,6 +14,8 @@ namespace Group6WebProject.Models
         [Required]
         [ForeignKey("User")]
         public int UserId { get; set; }
+
+        [ValidateNever]
         public User? User { get; set; }
 
         // Address fields
@@ -52,7 +55,7 @@ namespace Group6WebProject.Models
         [Display(Name = "Shipping Address Same as Mailing Address")]
         public bool IsShippingSameAsMailing { get; set; } = true;
 
-        // If the bool IsShippingSameAsMailing is true, these will not be visible.  
+        // Shipping address fields
         [Display(Name = "Shipping Street Address")]
         public string? ShippingStreetAddress { get; set; }
 

@@ -1,0 +1,62 @@
+@model Group6WebProject.Models.CreditCard
+
+@{
+    ViewData["Title"] = "Edit Credit Card";
+}
+
+<h2>Edit Credit Card</h2>
+
+<form asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.CreditCardID)
+
+    <div class="form-group">
+        <label asp-for="CardHolderName"></label>
+        <input asp-for="CardHolderName" class="form-control"/>
+        <span asp-validation-for="CardHolderName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="CardNumber"></label>
+        <input asp-for="CardNumber" class="form-control"/>
+        <span asp-validation-for="CardNumber" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ExpirationMonth"></label>
+        <select asp-for="ExpirationMonth" class="form-control">
+            @for (int month = 1; month <= 12; month++)
+            {
+                <option value="@month">@month.ToString("D2")</option>
+            }
+        </select>
+        <span asp-validation-for="ExpirationMonth" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ExpirationYear"></label>
+        <select asp-for="ExpirationYear" class="form-control">
+            @{
+                var currentYear = DateTime.Now.Year;
+                for (int year = currentYear; year <= currentYear + 15; year++)
+                {
+                    <option value="@year">@year</option>
+                }
+            }
+        </select>
+        <span asp-validation-for="ExpirationYear" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="CVV"></label>
+        <input asp-for="CVV" class="form-control"/>
+        <span asp-validation-for="CVV" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Credit Card</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -267,7 +267,8 @@ public class UserController : Controller
                 new(ClaimTypes.NameIdentifier, user.UserID.ToString()),
                 new(ClaimTypes.Name, user.Name),
                 new(ClaimTypes.Email, user.Email),
-                new("IsAdmin", user.IsAdmin.ToString())
+                new("IsAdmin", user.IsAdmin.ToString()),
+                new("IsEmployee", user.IsEmployee.ToString())
             };
 
             // Create claims identity

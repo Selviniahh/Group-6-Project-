@@ -1,0 +1,82 @@
+@model Group6WebProject.Models.Order
+
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<h2>Order Details</h2>
+
+<h3>Order Information</h3>
+<table class="table">
+    <tr>
+        <th>Order ID:</th>
+        <td>@Model.OrderID</td>
+    </tr>
+    <tr>
+        <th>User:</th>
+        <td>@Model.User.Name (@Model.User.Email)</td>
+    </tr>
+    <tr>
+        <th>Order Date:</th>
+        <td>@Model.OrderDate.ToString("f")</td>
+    </tr>
+    <tr>
+        <th>Status:</th>
+        <td>@Model.Status</td>
+    </tr>
+</table>
+
+<h3>Order Items</h3>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Game</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Subtotal</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.OrderItems)
+    {
+        <tr>
+            <td>@item.Game.Title</td>
+            <td>@item.Quantity</td>
+            <td>@item.Price.ToString("C")</td>
+            <td>@(item.Quantity * item.Price).ToString("C")</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<h3>Shipping Address</h3>
+<p>
+    @Model.ShippingAddress.FullName<br />
+    @Model.ShippingAddress.StreetAddress<br />
+    @if (!string.IsNullOrEmpty(Model.ShippingAddress.ApartmentSuite))
+    {
+        @Model.ShippingAddress.ApartmentSuite<br />
+    }
+    @Model.ShippingAddress.City, @Model.ShippingAddress.Province, @Model.ShippingAddress.PostalCode<br />
+    @Model.ShippingAddress.Country
+</p>
+
+<h3>Actions</h3>
+<form asp-action="ProcessOrder" method="post">
+    <input type="hidden" name="orderId" value="@Model.OrderID" />
+    <button type="submit" class="btn btn-success">Mark as Processed</button>
+    <a asp-action="Orders" class="btn btn-secondary">Back to Orders</a>
+</form>

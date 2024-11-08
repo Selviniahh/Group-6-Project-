@@ -25,38 +25,54 @@
 
                     @if (User.Identity.IsAuthenticated)
                     {
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Preferences" asp-action="PreferencesIndex">Preferences</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="WishList" asp-action="WishListIndex">Wishlist</a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Preferences" asp-action="PreferencesIndex">Preferences</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="WishList" asp-action="WishListIndex">Wishlist</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Cart" asp-action="Index">Cart</a>
+                        </li>
+                        <!-- Add this Address link -->
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Address" asp-action="Index">Addresses</a>
+                        </li>
                     
                     <a asp-controller="Events" asp-action="AllEvents" class="nav-link">Events</a>
                     }
 
                     @if (User.Identity.IsAuthenticated && bool.TryParse(User.FindFirst("IsAdmin")?.Value, out bool isAdmin) && isAdmin)
                     {
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Admin</a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Admin</a>
+                        </li>
                     }
+
+                    @* // Employee *@
+                    @if (User.Identity.IsAuthenticated && bool.TryParse(User.FindFirst("IsEmployee")?.Value, out bool isEmployee) && isEmployee)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="Orders">Employee Dashboard</a>
+                        </li>
+                    }
+
 
                 </ul>
 
                 @if (User.Identity.IsAuthenticated)
                 {
-                <form asp-action="Logout" asp-controller="User" method="post" class="form-inline">
-                    <span class="navbar-text mr-2">Hello, @User.Identity.Name</span>
-                    <button type="submit" class="btn btn-link">Logout</button>
-                </form>
+                    <form asp-action="Logout" asp-controller="User" method="post" class="form-inline">
+                        <span class="navbar-text mr-2">Hello, @User.Identity.Name</span>
+                        <button type="submit" class="btn btn-link">Logout</button>
+                    </form>
 
-                <a asp-action="Profile" asp-controller="User" class="btn btn-link">Profile</a>
+                    <a asp-action="Profile" asp-controller="User" class="btn btn-link">Profile</a>
                 }
                 else
                 {
-                <a class="nav-link text-dark" asp-controller="User" asp-action="Login">Login</a>
-                <a class="nav-link text-dark" asp-controller="User" asp-action="Register">Register</a>
+                    <a class="nav-link text-dark" asp-controller="User" asp-action="Login">Login</a>
+                    <a class="nav-link text-dark" asp-controller="User" asp-action="Register">Register</a>
                 }
 
             </div>

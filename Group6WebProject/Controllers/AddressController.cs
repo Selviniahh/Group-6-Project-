@@ -29,20 +29,21 @@ namespace Group6WebProject.Controllers
         }
 
         // GET: Address/Create
-        public IActionResult Create()
+        public IActionResult Create(string returnUrl = null)
         {
+            ViewBag.ReturnUrl = returnUrl;
             return View();
         }
 
         // POST: Address/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Address address)
+        public async Task<IActionResult> Create(Address address, string returnUrl = null)
         {
             if (ModelState.IsValid)
             {
                 address.UserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                
+
                 if (address.IsShippingSameAsMailing)
                 {
                     address.ShippingStreetAddress = address.StreetAddress;
@@ -55,6 +56,11 @@ namespace Group6WebProject.Controllers
 
                 _context.Add(address);
                 await _context.SaveChangesAsync();
+
+                if (!string.IsNullOrEmpty(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
                 return RedirectToAction(nameof(Index));
             }
             return View(address);

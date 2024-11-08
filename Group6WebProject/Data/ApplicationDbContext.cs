@@ -19,10 +19,24 @@ public class ApplicationDbContext : DbContext
     
     public DbSet<EventRegister> EventRegister { get; set; }
 
-    
+    public DbSet<Cart> Carts { get; set; }
+    public DbSet<CartItem> CartItems { get; set; }
+    public DbSet<CreditCard> CreditCards { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
+
+
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
     }
+    //CC Number examples: 
+    // 4111 1111 1111 1111
+    // 5555 5555 5555 4444
+    // 3782 822463 10005
+    //6011 1111 1111 1117
+    //3056 9309 0259 04
+    //3530 1113 3330 0000
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -58,6 +72,16 @@ public class ApplicationDbContext : DbContext
                 PasswordHash = UserController.HashPassword("Admin123"),
                 Status = EnrollmentStatus.EnrollmentConfirmed,
                 IsAdmin = true // Admin user
+            },
+            //Employee Seed
+            new User()
+            {
+                UserID = 3,
+                Name = "Default Employee",
+                Email = "employee@example.com",
+                PasswordHash = UserController.HashPassword("Employee123"),
+                Status = EnrollmentStatus.EnrollmentConfirmed,
+                IsEmployee = true
             });
 
         // Seed the default profile for the dummy user
@@ -105,4 +129,3 @@ public class ApplicationDbContext : DbContext
         );
     }
 }
-

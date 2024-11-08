@@ -20,3 +20,6 @@ node_modules/
 .env
 Group6WebProject/Migrations
 Migrations/
+Group6WebProject/app.db
+Group6WebProject/app.db-shm
+Group6WebProject/app.db-wal

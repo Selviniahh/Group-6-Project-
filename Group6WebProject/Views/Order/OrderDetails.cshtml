@@ -1,0 +1,42 @@
+@model Group6WebProject.Models.Order
+
+@{
+    ViewData["Title"] = "Order Details";
+}
+<h2>Thank you for shopping with us !</h2>
+<br/>
+<h2>Order Details - Order #@Model.OrderID</h2>
+
+<p><strong>Order Date:</strong> @Model.OrderDate</p>
+<p><strong>Status:</strong> @Model.Status</p>
+
+<h3>Items</h3>
+<table class="table">
+    <thead>
+    <tr>
+        <th>Game</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Subtotal</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.OrderItems)
+    {
+        <tr>
+            <td>@item.Game.Title</td>
+            <td>@item.Quantity</td>
+            <td>$@item.Price</td>
+            <td>$@(item.Price * item.Quantity)</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<h3>Shipping Address</h3>
+<p>
+    @Model.ShippingAddress.FullName<br />
+    @Model.ShippingAddress.StreetAddress<br />
+    @Model.ShippingAddress.City, @Model.ShippingAddress.Province, @Model.ShippingAddress.PostalCode<br />
+    @Model.ShippingAddress.Country
+</p>

@@ -1,0 +1,41 @@
+@model IEnumerable<Group6WebProject.Models.CreditCard>
+
+@{
+    ViewData["Title"] = "Your Credit Cards";
+}
+
+<h2>Your Credit Cards</h2>
+
+<a asp-action="Create" class="btn btn-primary mb-3">Add New Credit Card</a>
+
+@if (!Model.Any())
+{
+    <p>You have no credit cards on file.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Cardholder Name</th>
+            <th>Card Number</th>
+            <th>Expiration</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var card in Model)
+        {
+            <tr>
+                <td>@card.CardHolderName</td>
+                <td>**** **** **** @card.CardNumber.Substring(card.CardNumber.Length - 4)</td>
+                <td>@card.ExpirationMonth.ToString("D2")/@card.ExpirationYear</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@card.CreditCardID" class="btn btn-sm btn-info">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@card.CreditCardID" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

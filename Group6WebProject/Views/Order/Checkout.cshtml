@@ -1,0 +1,55 @@
+@model Group6WebProject.Models.Cart
+
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<h2>Checkout</h2>
+
+<form asp-action="Checkout" method="post">
+    @Html.AntiForgeryToken()
+
+    <h3>Your Cart</h3>
+    <!-- Display cart items similar to Cart/Index -->
+
+    <h3>Select Credit Card</h3>
+    @if (ViewBag.CreditCards.Count == 0)
+    {
+        <p>You have no credit cards on file. <a asp-action="Create" asp-controller="CreditCard">Add a Credit Card</a></p>
+    }
+    else
+    {
+        foreach (var card in ViewBag.CreditCards)
+        {
+            <div>
+                <input type="radio" name="creditCardId" value="@card.CreditCardID" required/>
+                **** **** **** @card.CardNumber.Substring(card.CardNumber.Length - 4)
+            </div>
+        }
+    }
+
+    <h3>Select Shipping Address</h3>
+    @if (ViewBag.Addresses.Count == 0)
+    {
+        <p>You have no addresses on file. <a asp-action="Create" asp-controller="Address">Add a New Address</a></p>
+    }
+    else
+    {
+        foreach (var address in ViewBag.Addresses)
+        {
+            <div>
+                <input type="radio" name="addressId" value="@address.Id" required/>
+                @address.StreetAddress, @address.City, @address.Province, @address.PostalCode
+            </div>
+        }
+    }
+
+    @if (ViewBag.CreditCards.Count > 0 && ViewBag.Addresses.Count > 0)
+    {
+        <button type="submit" class="btn btn-primary">Place Order</button>
+    }
+    else
+    {
+        <p>You need to have both a credit card and a shipping address to place an order.</p>
+    }
+</form>

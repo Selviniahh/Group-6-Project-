@@ -15,6 +15,8 @@ public class User
 {
     [Key]
     public int UserID { get; set; }
+    
+    public bool IsEmployee { get; set; } = false;
 
     [Required(ErrorMessage = "Student name is required.")]
     public string Name { get; set; }

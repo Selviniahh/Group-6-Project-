@@ -21,18 +21,23 @@ namespace Group6WebProject.Controllers
         {
             ViewData["CurrentFilter"] = searchString;
 
-            if (string.IsNullOrEmpty(searchString))
+            if (string.IsNullOrWhiteSpace(searchString))
             {
                 ViewData["Message"] = "Please enter a search term";
+                return View(new List<Game>());
             }
 
-            // Find the games based on search criteria
+            // Sanitize the search string to prevent SQL injection attacks
+            var sanitizedSearchString = searchString.Trim();
+
+            // Use EF.Functions.Like for case-insensitive search
             var games = _context.Games.Where(s =>
-                s.Title.Contains(searchString) ||
-                s.Description.Contains(searchString) ||
-                s.Genre.Contains(searchString) ||
-                s.Platform.Contains(searchString) ||
-                s.ReleaseDate.ToString().Contains(searchString));
+                EF.Functions.Like(s.Title, $"%{sanitizedSearchString}%") ||
+                EF.Functions.Like(s.Description, $"%{sanitizedSearchString}%") ||
+                EF.Functions.Like(s.Genre, $"%{sanitizedSearchString}%") ||
+                EF.Functions.Like(s.Platform, $"%{sanitizedSearchString}%") ||
+                EF.Functions.Like(s.ReleaseDate.ToString(), $"%{sanitizedSearchString}%")
+            );
 
             var gamesList = await games.ToListAsync();
 
