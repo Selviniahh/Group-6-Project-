@@ -31,6 +31,8 @@
                     <li class="nav-item">
                         <a class="nav-link text-dark" asp-area="" asp-controller="WishList" asp-action="WishListIndex">Wishlist</a>
                     </li>
+                    
+                    <a asp-controller="Events" asp-action="AllEvents" class="nav-link">Events</a>
                     }
 
                     @if (User.Identity.IsAuthenticated && bool.TryParse(User.FindFirst("IsAdmin")?.Value, out bool isAdmin) && isAdmin)

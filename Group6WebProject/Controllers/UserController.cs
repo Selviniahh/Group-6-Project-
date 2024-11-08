@@ -404,4 +404,7 @@ public class UserController : Controller
         //return to friends and family details page
         return RedirectToAction("FriendsAndFamilyDetails", new { userId });
     }
+    
+    
+
 }

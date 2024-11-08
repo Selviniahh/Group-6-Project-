@@ -1,0 +1,56 @@
+@model Group6WebProject.Models.Event
+
+@{
+    ViewBag.Title = "Event Details";
+}
+
+<h2>Event Details</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+<div class="alert alert-success">
+    @TempData["SuccessMessage"]
+</div>
+}
+
+@if (TempData["InfoMessage"] != null)
+{
+<div class="alert alert-info">
+    @TempData["InfoMessage"]
+</div>
+}
+
+<div class="card" style="width: 100%;">
+    <div class="card-body">
+        <h5 class="card-title">@Model.Name</h5>
+        <h6 class="card-subtitle mb-2 text-muted">Event Date: @Model.EventDate.ToString("yyyy-MM-dd")</h6>
+        <p class="card-text">@Model.Description</p>
+
+        <hr />
+
+        <h4>Register for this Event</h4>
+        <form asp-action="RegisterForEvent" method="post">
+            <input type="hidden" name="eventId" value="@Model.Id" />
+            <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+
+        <hr />
+        
+        @if (Model.EventRegister?.Any() == true)
+        {
+            <h4>Registered Users</h4>
+            <ul>
+                @foreach (var registration in Model.EventRegister)
+                {
+                    <li>@registration.User.Name</li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>No users are registered for this event yet!</p>
+        }
+    </div>
+</div>
+
+<a asp-action="AllEvents" class="btn btn-secondary mt-3">Back to Events List</a>

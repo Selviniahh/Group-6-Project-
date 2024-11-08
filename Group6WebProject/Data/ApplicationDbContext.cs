@@ -16,6 +16,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<GameRating> Ratings { get; set; }
     public DbSet<Address> Addresses { get; set; }
     public DbSet<WishlistItem> WishlistItems { get; set; }
+    
+    public DbSet<EventRegister> EventRegister { get; set; }
 
     
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
@@ -35,6 +37,7 @@ public class ApplicationDbContext : DbContext
             .HasMany(u => u.FriendsAndFamily)
             .WithMany()
             .UsingEntity(j => j.ToTable("UserFriendsAndFamily"));
+
         // Seed the database with a single user as an instance in the User table
         modelBuilder.Entity<User>().HasData(
             new User()
