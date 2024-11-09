@@ -1,10 +1,10 @@
 @model Group6WebProject.Models.CreditCard
 
 @{
-    ViewData["Title"] = "Add New Credit Card";
+    ViewData["Title"] = "Add Credit Card";
 }
 
-<h2>Add New Credit Card</h2>
+<h2>Add Credit Card</h2>
 
 @if (ViewBag.ValidationErrors != null && ViewBag.ValidationErrors.Count > 0)
 {
@@ -20,7 +20,8 @@
 
 <form asp-action="Create" method="post">
     @Html.AntiForgeryToken()
-
+    <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+    
     <div class="form-group">
         <label asp-for="CardHolderName"></label>
         <input asp-for="CardHolderName" class="form-control"/>

@@ -28,30 +28,35 @@ public class CreditCardController : Controller
     }
 
     // GET: /CreditCard/Create
-    public IActionResult Create()
+    public IActionResult Create(string returnUrl = null)
     {
+        ViewBag.ReturnUrl = returnUrl;
         return View();
     }
 
-    // POST: /CreditCard/Create
+    // POST: CreditCard/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(CreditCard creditCard)
+    public async Task<IActionResult> Create(CreditCard creditCard, string returnUrl = null)
     {
         if (ModelState.IsValid)
         {
             creditCard.UserID = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            _context.CreditCards.Add(creditCard);
+
+            _context.Add(creditCard);
             await _context.SaveChangesAsync();
+
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
-        // If ModelState is invalid, collect the errors
-        var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-        ViewBag.ValidationErrors = errors; // Pass errors to the view
-
         return View(creditCard);
     }
+
 
     // GET: /CreditCard/Edit/5
     public async Task<IActionResult> Edit(int id)

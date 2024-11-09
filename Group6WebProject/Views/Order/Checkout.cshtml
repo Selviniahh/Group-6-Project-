@@ -15,7 +15,7 @@
     <h3>Select Credit Card</h3>
     @if (ViewBag.CreditCards.Count == 0)
     {
-        <p>You have no credit cards on file. <a asp-action="Create" asp-controller="CreditCard">Add a Credit Card</a></p>
+        <a asp-controller="CreditCard" asp-action="Create" asp-route-returnUrl="@Url.Action("Checkout", "Order")" class="btn btn-primary">Add a New Credit Card</a>
     }
     else
     {
@@ -31,7 +31,7 @@
     <h3>Select Shipping Address</h3>
     @if (ViewBag.Addresses.Count == 0)
     {
-        <p>You have no addresses on file. <a asp-action="Create" asp-controller="Address">Add a New Address</a></p>
+        <a asp-controller="Address" asp-action="Create" asp-route-returnUrl="@Url.Action("Checkout", "Order")" class="btn btn-primary">Add a New Address</a>
     }
     else
     {

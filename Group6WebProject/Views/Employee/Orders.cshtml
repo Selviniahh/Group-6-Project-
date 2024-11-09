@@ -6,6 +6,12 @@
 
 <h2>Pending Orders</h2>
 
+@if (!Model.Any())
+{
+<p>No pending orders left.</p>
+}
+else
+{
 <table class="table">
     <thead>
     <tr>
@@ -19,19 +25,20 @@
     <tbody>
     @foreach (var order in Model)
     {
-        <tr>
-            <td>@order.OrderID</td>
-            <td>@order.User.Name</td>
-            <td>@order.OrderDate</td>
-            <td>@order.OrderItems.Count</td>
-            <td>
-                <a asp-action="OrderDetails" asp-controller="Employee" asp-route-orderId="@order.OrderID" class="btn btn-info">View Details</a>
-                <form asp-action="ProcessOrder" method="post" style="display:inline;">
-                    <input type="hidden" name="orderId" value="@order.OrderID" />
-                    <button type="submit" class="btn btn-success">Mark as Processed</button>
-                </form>
-            </td>
-        </tr>
+    <tr>
+        <td>@order.OrderID</td>
+        <td>@order.User.Name</td>
+        <td>@order.OrderDate</td>
+        <td>@order.OrderItems.Count</td>
+        <td>
+            <a asp-action="OrderDetails" asp-controller="Employee" asp-route-orderId="@order.OrderID" class="btn btn-info">View Details</a>
+            <form asp-action="ProcessOrder" method="post" style="display:inline;">
+                <input type="hidden" name="orderId" value="@order.OrderID" />
+                <button type="submit" class="btn btn-success">Mark as Processed</button>
+            </form>
+        </td>
+    </tr>
     }
     </tbody>
 </table>
+}

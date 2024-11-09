@@ -20,7 +20,7 @@
     </dl>
 </div>
 
-<form asp-action="DeleteConfirmed" method="post">
+<form asp-action="Delete" method="post">
     @Html.AntiForgeryToken()
     @Html.HiddenFor(model => model.CreditCardID)
     <button type="submit" class="btn btn-danger">Delete</button>
