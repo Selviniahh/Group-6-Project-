@@ -24,14 +24,13 @@ namespace Group6WebProject.Controllers
 
             if (string.IsNullOrWhiteSpace(searchString))
             {
-                ViewData["Message"] = "Please enter a search term";
+                ModelState.AddModelError(string.Empty, "Please enter a search term.");
                 return View(new List<Game>());
             }
 
-            // Sanitize the search string to prevent SQL injection attacks
+            // Existing search logic
             var sanitizedSearchString = searchString.Trim();
 
-            // make case-insensitive search with EF core
             var games = _context.Games.Where(s =>
                 EF.Functions.Like(s.Title, $"%{sanitizedSearchString}%") ||
                 EF.Functions.Like(s.Description, $"%{sanitizedSearchString}%") ||
@@ -44,7 +43,7 @@ namespace Group6WebProject.Controllers
 
             if (!gamesList.Any())
             {
-                ViewData["Message"] = "No games found matching your search results";
+                ViewData["Message"] = "No games found matching your search results.";
             }
 
             return View(gamesList);
@@ -247,6 +246,12 @@ namespace Group6WebProject.Controllers
                 .AnyAsync(o => o.UserID == userId && o.OrderItems.Any(oi => oi.GameID == gameId));
 
             return hasPurchased;
+        }
+
+        public async Task<IActionResult> GameList()
+        {
+            var games = await _context.Games.ToListAsync();
+            return View(games);
         }
     }
 }

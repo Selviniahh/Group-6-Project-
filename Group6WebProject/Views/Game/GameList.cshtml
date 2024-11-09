@@ -1,0 +1,39 @@
+@model IEnumerable<Group6WebProject.Models.Game>
+
+@{
+    ViewData["Title"] = "Game List";
+}
+
+<h2>Game List</h2>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Image</th>
+        <th>Title</th>
+        <th>Genre</th>
+        <th>Platform</th>
+        <th>Price</th>
+        <th>Release Date</th>
+        <th>Details</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var game in Model)
+    {
+        <tr>
+            <td>
+                <img src="~/images/@game.ImageFileName" alt="@game.Title" style="width: 100px;"/>
+            </td>
+            <td>@game.Title</td>
+            <td>@game.Genre</td>
+            <td>@game.Platform</td>
+            <td>@game.Price</td>
+            <td>@game.ReleaseDate.ToString("yyyy-MM-dd")</td>
+            <td>
+                <a asp-action="Details" asp-route-id="@game.Id" class="btn btn-primary">View Details</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

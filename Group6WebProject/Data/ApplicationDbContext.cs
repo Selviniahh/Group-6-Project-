@@ -105,7 +105,8 @@ public class ApplicationDbContext : DbContext
                 Price = "$19.99",
                 Platform = "Windows",
                 ReleaseDate = new DateTime(2023, 1, 1),
-                DownloadUrl = "https://github.com/user-attachments/files/17656884/Pathfinding.zip"
+                DownloadUrl = "https://github.com/user-attachments/files/17656884/Pathfinding.zip",
+                ImageFileName = "Pathfinding.jpg"
             },
             new Game
             {
@@ -116,7 +117,8 @@ public class ApplicationDbContext : DbContext
                 Price = "$29.99",
                 Platform = "Windows",
                 ReleaseDate = new DateTime(2023, 2, 2),
-                DownloadUrl = "https://github.com/user-attachments/files/17656885/ETG.zip"
+                DownloadUrl = "https://github.com/user-attachments/files/17656885/ETG.zip",
+                ImageFileName = "EnterTheGungeon.png"
             },
             new Game
             {
@@ -127,7 +129,8 @@ public class ApplicationDbContext : DbContext
                 Price = "$9.99",
                 Platform = "Windows",
                 ReleaseDate = new DateTime(2023, 3, 3),
-                DownloadUrl = "https://github.com/user-attachments/files/17656888/TileMap.zip"
+                DownloadUrl = "https://github.com/user-attachments/files/17656888/TileMap.zip",
+                ImageFileName = "TileMap.jpg"
             },
             new Game
             {
@@ -138,7 +141,8 @@ public class ApplicationDbContext : DbContext
                 Price = "$0.00",
                 Platform = "Windows",
                 ReleaseDate = new DateTime(2023, 4, 4),
-                DownloadUrl = "https://github.com/user-attachments/files/17657333/DrawCircle.zip"
+                DownloadUrl = "https://github.com/user-attachments/files/17657333/DrawCircle.zip",
+                ImageFileName = "BounceBall.jpg"
             }
         );
     }

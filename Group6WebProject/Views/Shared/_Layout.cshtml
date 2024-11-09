@@ -22,6 +22,9 @@
                     <li class="nav-item">
                         <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Game" asp-action="GameList">GameList</a>
+                    </li>
 
                     @if (User.Identity.IsAuthenticated)
                     {
@@ -38,8 +41,11 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Address" asp-action="Index">Addresses</a>
                         </li>
-                    
-                    <a asp-controller="Events" asp-action="AllEvents" class="nav-link">Events</a>
+
+                        <a asp-controller="Events" asp-action="AllEvents" class="nav-link">Events</a>
+                        <li>
+                            <a class="nav-link text-dark" asp-controller="CreditCard" asp-action="Index">Credit Cards</a>
+                        </li>
                     }
 
                     @if (User.Identity.IsAuthenticated && bool.TryParse(User.FindFirst("IsAdmin")?.Value, out bool isAdmin) && isAdmin)

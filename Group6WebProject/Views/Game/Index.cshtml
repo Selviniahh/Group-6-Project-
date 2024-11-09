@@ -6,12 +6,14 @@
 
 <h2>Games</h2>
 
-<form asp-action="Index" method="get">
-    <p>
-        Search: <input type="text" name="searchString" value="@ViewData["CurrentFilter"]"/>
-        <input type="submit" value="Search" class="btn btn-primary"/>
-    </p>
+<form method="get" asp-action="Index">
+    <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" placeholder="Search games..." />
+    <button type="submit">Search</button>
 </form>
+
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+
 
 <table class="table table-striped">
     <thead>
