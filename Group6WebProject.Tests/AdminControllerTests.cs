@@ -79,7 +79,7 @@ namespace Group6WebProject.Tests
                 ReleaseDate = new DateTime(2024, 1, 1),
                 DownloadUrl = "https://github.com/user-attachments/files/17656884/Pathfinding.zip",
                 ImageFileName = "Pathfinding.jpg",
-                VideoFileName = "AStar.mp4"
+                VideoUrl = "https://github.com/user-attachments/assets/30b28a29-06fd-4147-8b0e-5b79c9a4ef59"
             };
 
             // Act: Add the new game using the controller method

@@ -15,7 +15,7 @@ public class Game
 
     public string DownloadUrl { get; set; }
     public string ImageFileName { get; set; }
-    public string VideoFileName { get; set; }
+    public string VideoUrl { get; set; }
 
     public ICollection<GameReview> Reviews { get; set; }
     public ICollection<GameRating> Ratings { get; set; }

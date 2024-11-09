@@ -7,10 +7,21 @@ ViewData["Title"] = "Game Details";
 <h2>@Model.Game.Title</h2>
 
 <div>
+
+    @if (!string.IsNullOrEmpty(Model.Game.VideoUrl))
+    {
+    <!-- Video is available -->
     <video width="640" height="360" controls>
-        <source src="~/videos/@Model.Game.VideoFileName" type="video/mp4">
+        <source src="@Model.Game.VideoUrl" type="video/mp4">
         Your browser does not support the video tag.
-    </video>    
+    </video>
+    }
+    else
+    {
+    <!-- Video is not available so choose a static image -->
+    <img src="~/images/@Model.Game.ImageFileName" alt="@Model.Game.Title" class="img-fluid" />
+    }
+    
     <h4>Genre:</h4> <p>@Model.Game.Genre</p>
     <h4>Platform:</h4> <p>@Model.Game.Platform</p>
     <h4>Release Date:</h4> <p>@Model.Game.ReleaseDate.ToString("yyyy-MM-dd")</p>

@@ -26,4 +26,11 @@
       <Compile Remove="Migrations\ApplicationDbContextModelSnapshot.cs" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="wwwroot\videos\AStar.mp4" />
+      <_ContentIncludedByDefault Remove="wwwroot\videos\DrawCircle.mp4" />
+      <_ContentIncludedByDefault Remove="wwwroot\videos\ETG.mp4" />
+      <_ContentIncludedByDefault Remove="wwwroot\videos\TileMap.mp4" />
+    </ItemGroup>
+
 </Project>

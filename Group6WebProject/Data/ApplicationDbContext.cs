@@ -107,7 +107,7 @@ public class ApplicationDbContext : DbContext
                 ReleaseDate = new DateTime(2023, 1, 1),
                 DownloadUrl = "https://github.com/user-attachments/files/17656884/Pathfinding.zip",
                 ImageFileName = "Pathfinding.jpg",
-                VideoFileName = "AStar.mp4"
+                VideoUrl = "https://github.com/user-attachments/assets/5ca9d61a-2f5b-4b58-a688-6ee62e15f2bc" // Pathfinding
             },
             new Game
             {
@@ -120,7 +120,7 @@ public class ApplicationDbContext : DbContext
                 ReleaseDate = new DateTime(2023, 2, 2),
                 DownloadUrl = "https://github.com/user-attachments/files/17656885/ETG.zip",
                 ImageFileName = "EnterTheGungeon.png",
-                VideoFileName = "ETG.mp4"
+                VideoUrl = "https://github.com/user-attachments/assets/9ad5d204-4dc5-4140-927b-deca022ca3ff"
             },
             new Game
             {
@@ -133,7 +133,7 @@ public class ApplicationDbContext : DbContext
                 ReleaseDate = new DateTime(2023, 3, 3),
                 DownloadUrl = "https://github.com/user-attachments/files/17656888/TileMap.zip",
                 ImageFileName = "TileMap.jpg",
-                VideoFileName = "TileMap.mp4"
+                VideoUrl = "https://github.com/user-attachments/assets/30b28a29-06fd-4147-8b0e-5b79c9a4ef59"
             },
             new Game
             {
@@ -146,7 +146,7 @@ public class ApplicationDbContext : DbContext
                 ReleaseDate = new DateTime(2023, 4, 4),
                 DownloadUrl = "https://github.com/user-attachments/files/17657333/DrawCircle.zip",
                 ImageFileName = "BounceBall.jpg",
-                VideoFileName = "DrawCircle.mp4"
+                VideoUrl = "https://github.com/user-attachments/assets/e79c6c09-1d33-4bb0-a2ce-5775f99767a5"
             }
         );
     }
