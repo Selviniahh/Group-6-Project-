@@ -106,7 +106,8 @@ public class ApplicationDbContext : DbContext
                 Platform = "Windows",
                 ReleaseDate = new DateTime(2023, 1, 1),
                 DownloadUrl = "https://github.com/user-attachments/files/17656884/Pathfinding.zip",
-                ImageFileName = "Pathfinding.jpg"
+                ImageFileName = "Pathfinding.jpg",
+                VideoFileName = "AStar.mp4"
             },
             new Game
             {
@@ -118,7 +119,8 @@ public class ApplicationDbContext : DbContext
                 Platform = "Windows",
                 ReleaseDate = new DateTime(2023, 2, 2),
                 DownloadUrl = "https://github.com/user-attachments/files/17656885/ETG.zip",
-                ImageFileName = "EnterTheGungeon.png"
+                ImageFileName = "EnterTheGungeon.png",
+                VideoFileName = "ETG.mp4"
             },
             new Game
             {
@@ -130,7 +132,8 @@ public class ApplicationDbContext : DbContext
                 Platform = "Windows",
                 ReleaseDate = new DateTime(2023, 3, 3),
                 DownloadUrl = "https://github.com/user-attachments/files/17656888/TileMap.zip",
-                ImageFileName = "TileMap.jpg"
+                ImageFileName = "TileMap.jpg",
+                VideoFileName = "TileMap.mp4"
             },
             new Game
             {
@@ -142,7 +145,8 @@ public class ApplicationDbContext : DbContext
                 Platform = "Windows",
                 ReleaseDate = new DateTime(2023, 4, 4),
                 DownloadUrl = "https://github.com/user-attachments/files/17657333/DrawCircle.zip",
-                ImageFileName = "BounceBall.jpg"
+                ImageFileName = "BounceBall.jpg",
+                VideoFileName = "DrawCircle.mp4"
             }
         );
     }
