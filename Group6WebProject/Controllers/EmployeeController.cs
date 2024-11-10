@@ -56,7 +56,7 @@ namespace Group6WebProject.Controllers
                 _context.Orders.Update(order);
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = $"Order #{order.OrderID} has been marked as processed.";
+                // TempData["SuccessMessage"] = $"Order #{order.OrderID} has been marked as processed.";
 
                 return RedirectToAction("Orders", new { orderId = order.OrderID });
             }

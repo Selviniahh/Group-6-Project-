@@ -146,7 +146,7 @@ namespace Group6WebProject.Controllers
             // Send confirmation email
             await _emailService.SendEmailAsync(orderDetails.User.Email, "Order Confirmation", emailBody);
 
-            TempData["SuccessMessage"] = "Order placed successfully.";
+            // TempData["SuccessMessage"] = "Order placed successfully.";
             return RedirectToAction("OrderDetails", new { id = order.OrderID });
         }
 

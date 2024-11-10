@@ -14,6 +14,8 @@ public class Game
     public string Platform { get; set; }
 
     public string DownloadUrl { get; set; }
+    public string ImageFileName { get; set; }
+    public string VideoUrl { get; set; }
 
     public ICollection<GameReview> Reviews { get; set; }
     public ICollection<GameRating> Ratings { get; set; }

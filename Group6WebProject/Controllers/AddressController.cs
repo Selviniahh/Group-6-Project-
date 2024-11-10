@@ -114,8 +114,10 @@ namespace Group6WebProject.Controllers
                     else
                         throw;
                 }
+
                 return RedirectToAction(nameof(Index));
             }
+
             return View(address);
         }
 
@@ -145,6 +147,7 @@ namespace Group6WebProject.Controllers
                 _context.Addresses.Remove(address);
                 await _context.SaveChangesAsync();
             }
+
             return RedirectToAction(nameof(Index));
         }
 
