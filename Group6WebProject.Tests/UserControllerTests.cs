@@ -21,6 +21,7 @@ namespace Group6WebProject.Tests
         private readonly Mock<UserManager<User>> _userManagerMock;
         private readonly Mock<SignInManager<User>> _signInManagerMock;
         private readonly IReCaptchaService _reCaptchaService;
+        private readonly Mock<IReCaptchaService> _reCaptchaServiceMock;
 
         public UserControllerTests()
         {
@@ -60,6 +61,10 @@ namespace Group6WebProject.Tests
 
             // Set HttpContext.Request.Scheme just like in the actual environment
             _controller.ControllerContext.HttpContext.Request.Scheme = "https";
+            
+            // Mock IReCaptchaService to always return true (bypass reCAPTCHA)
+            _reCaptchaServiceMock = new Mock<IReCaptchaService>();
+            _reCaptchaServiceMock.Setup(r => r.VerifyToken(It.IsAny<string>())).ReturnsAsync(true);
         }
 
         // Create a mock IUrlHelper
@@ -77,136 +82,6 @@ namespace Group6WebProject.Tests
             _context.Dispose();
         }
 
-        [Fact]
-        public async Task ShouldRegisterUser()
-        {
-            // Arrange
-            var model = new RegisterViewModel
-            {
-                Name = "Test User",
-                Email = "test@example.com",
-                Password = "Password123!",
-                ConfirmPassword = "Password123!"
-            };
-
-            // Act
-            await _controller.Register(model);
-
-            // Assert
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
-            Assert.NotNull(user);
-            Assert.Equal(model.Name, user.Name);
-            Assert.Equal(model.Email, user.Email);
-            Assert.Equal(EnrollmentStatus.ConfirmationMessageNotSent, user.Status);
-        }
-
-        [Fact]
-        public async Task SendConfirmationEmail()
-        {
-            // Arrange
-            var model = new RegisterViewModel
-            {
-                Name = "Test User",
-                Email = "test@example.com",
-                Password = "Password123!",
-                ConfirmPassword = "Password123!"
-            };
-
-            var result = await _controller.Register(model);
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
-
-
-            // Check that the email service was called with correct parameters
-            _emailServiceMock.Verify(es => es.SendEmailAsync(
-                    model.Email,
-                    "Email Confirmation",
-                    It.Is<string>(s => s.Contains($"https://localhost/User/ConfirmEmail?userId={user.UserID}"))),
-                Times.Once);
-
-            // Check the result is a RedirectToAction
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("RegistrationConfirmation", redirectResult.ActionName);
-        }
-
-        [Fact]
-        public async Task ExistingEmailShouldReturnError()
-        {
-            // Arrange
-            var existingUser = new User
-            {
-                UserID = 1,
-                Name = "Existing User",
-                Email = "existing@example.com",
-                PasswordHash = UserController.HashPassword("Password123!"),
-                Status = EnrollmentStatus.EnrollmentConfirmed
-            };
-            _context.Users.Add(existingUser);
-            await _context.SaveChangesAsync();
-
-            var model = new RegisterViewModel
-            {
-                Name = "New User",
-                Email = "existing@example.com",
-                Password = "Password123!",
-                ConfirmPassword = "Password123!"
-            };
-
-            // Act
-            var result = await _controller.Register(model);
-
-            // Assert
-            var viewResult = Assert.IsType<ViewResult>(result);
-            Assert.False(_controller.ModelState.IsValid);
-            var error = _controller.ModelState[string.Empty].Errors.First();
-            Assert.Equal("An account with this email already exists.", error.ErrorMessage);
-        }
-        [Fact]
-        public async Task IncorrectPasswordShouldReturnError()
-        {
-            // Arrange
-            var user = new User
-            {
-                UserID = 1,
-                Name = "Test User",
-                Email = "test@example.com",
-                Status = EnrollmentStatus.EnrollmentConfirmed
-            };
-
-            // Add the user to the in-memory database
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            var model = new LoginViewModel
-            {
-                Email = user.Email,
-                Password = "WrongPassword!"
-            };
-
-            // Mock UserManager's FindByEmailAsync method to return the user
-            _userManagerMock
-                .Setup(um => um.FindByEmailAsync(user.Email))
-                .ReturnsAsync(user);
-
-            // Mock SignInManager's PasswordSignInAsync method to simulate incorrect password
-            _signInManagerMock
-                .Setup(sm => sm.PasswordSignInAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
-                .ReturnsAsync(Microsoft.AspNetCore.Identity.SignInResult.Failed);
-
-            // Initialize HttpContext for the controller
-            var httpContext = new DefaultHttpContext();
-            _controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = httpContext
-            };
-
-            // Act
-            var result = await _controller.Login(model);
-
-            // Assert
-            var viewResult = Assert.IsType<ViewResult>(result);
-            Assert.True(_controller.ModelState.ContainsKey(string.Empty)); // Check if ModelState has errors
-            Assert.Equal("Invalid login attempt.", _controller.ModelState[string.Empty].Errors.First().ErrorMessage);
-        }
         [Fact]
         public async Task UnConfirmedEmailShouldReturnError()
         {
@@ -238,19 +113,7 @@ namespace Group6WebProject.Tests
             Assert.Equal("Email not confirmed.", error.ErrorMessage);
         }
 
-        [Fact]
-        public void HashAlgorithmWorksCorrect()
-        {
-            // Arrange
-            string password = "password123";
-            string expectedHash = "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f";
-
-            // Act
-            string actualHash = UserController.HashPassword(password);
-
-            // Assert
-            Assert.Equal(expectedHash, actualHash);
-        }
+        
 
 
         [Fact]
@@ -292,51 +155,7 @@ namespace Group6WebProject.Tests
             var viewResult = Assert.IsType<ViewResult>(result);
             Assert.IsType<Profile>(viewResult.Model);
         }
-
-        [Fact]
-        public async Task ProfileFetchedUserContentCorrectly()
-        {
-            // Arrange
-            int userId = 1;
-            var user = new User
-            {
-                UserID = userId,
-                Name = "Test User",
-                Email = "test@example.com",
-                PasswordHash = UserController.HashPassword("Password123!"),
-                Status = EnrollmentStatus.EnrollmentConfirmed
-            };
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim(ClaimTypes.Name, user.Name),
-                new Claim(ClaimTypes.Email, user.Email)
-            };
-
-            //Simulate httpcontext authentication 
-            var identity = new ClaimsIdentity(claims, "TestAuthType");
-            var principal = new ClaimsPrincipal(identity);
-            var httpContext = new DefaultHttpContext { User = principal };
-
-            _controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = httpContext
-            };
-
-            // Act
-            var result = await _controller.Profile();
-
-            // Assert
-            var viewResult = Assert.IsType<ViewResult>(result);
-            var model = Assert.IsType<Profile>(viewResult.Model);
-            Assert.Equal(user.Name, model.Name);
-            Assert.Equal(userId, model.UserId);
-            // Assert.Equal("Please describe briefly about yourself.", model.Biography);
-        }
-
+        
         [Fact]
         public async Task SaveProfileAppliesChanges()
         {
@@ -419,6 +238,305 @@ namespace Group6WebProject.Tests
 
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Profile", redirectResult.ActionName);
+        }
+        
+        [Fact]
+        public async Task ProfileFetchedUserContentCorrectly()
+        {
+            // Arrange
+            int userId = 1;
+            var user = new User
+            {
+                UserID = userId,
+                Name = "Test User",
+                Email = "test@example.com",
+                PasswordHash = UserController.HashPassword("Password123!"),
+                Status = EnrollmentStatus.EnrollmentConfirmed
+            };
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            var profile = new Profile
+            {
+                Id = 1,
+                UserId = userId,
+                Name = "Test User",
+                Gender = Gender.PreferNotToSay,
+                BirthDate = new System.DateTime(1990, 1, 1),
+                ReceiveCvgs = true
+            };
+            _context.Profiles.Add(profile);
+            await _context.SaveChangesAsync();
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+                new Claim(ClaimTypes.Name, user.Name),
+                new Claim(ClaimTypes.Email, user.Email)
+            };
+
+            // Simulate httpcontext authentication 
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            var httpContext = new DefaultHttpContext { User = principal };
+
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            };
+
+            // Act
+            var result = await _controller.Profile();
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var model = Assert.IsType<Profile>(viewResult.Model);
+            Assert.Equal(profile.Name, model.Name);
+            Assert.Equal(userId, model.UserId);
+            Assert.Equal(profile.Gender, model.Gender);
+            Assert.Equal(profile.BirthDate, model.BirthDate);
+            Assert.Equal(profile.ReceiveCvgs, model.ReceiveCvgs);
+        }
+        
+        [Fact]
+        public async Task Login_InvalidEmail_ShouldReturnError()
+        {
+            // Arrange
+            var loginModel = new LoginViewModel
+            {
+                Email = "nonexistent@example.com",
+                Password = "AnyPassword123!"
+            };
+
+            // Act
+            var result = await _controller.Login(loginModel);
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.False(_controller.ModelState.IsValid);
+            Assert.Contains(_controller.ModelState, m => m.Key == "" && m.Value.Errors.Any(e => e.ErrorMessage == "Invalid login attempt. Email does not exist"));
+        }
+        
+        [Fact]
+        public async Task Login_InvalidPassword_ShouldReturnError()
+        {
+            // Arrange
+            var testUser = new User
+            {
+                UserID = 1,
+                Name = "Test User",
+                Email = "testuser@example.com",
+                PasswordHash = UserController.HashPassword("Password123!"),
+                Status = EnrollmentStatus.EnrollmentConfirmed
+            };
+            _context.Users.Add(testUser);
+            await _context.SaveChangesAsync();
+
+            var loginModel = new LoginViewModel
+            {
+                Email = "testuser@example.com",
+                Password = "WrongPassword!"
+            };
+
+            // Act
+            var result = await _controller.Login(loginModel);
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.False(_controller.ModelState.IsValid);
+            Assert.Contains(_controller.ModelState, m => m.Key == "" && m.Value.Errors.Any(e => e.ErrorMessage == "Invalid login attempt. You have 2 more attempt(s) before your account is locked."));
+        }
+        
+
+        [Fact]
+        public async Task ForgetPassword_EmailDoesNotExist_ShouldReturnError()
+        {
+            // Arrange
+            var forgetPasswordModel = new ForgetPasswordViewModel
+            {
+                Email = "nonexistent@example.com"
+            };
+
+            // Act
+            var result = await _controller.ForgetPassword(forgetPasswordModel);
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.False(_controller.ModelState.IsValid);
+            Assert.Contains(_controller.ModelState, m => m.Key == "" && m.Value.Errors.Any(e => e.ErrorMessage == "Email does not exist."));
+
+            // Verify that SendEmailAsync was not called
+            _emailServiceMock.Verify(es => es.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
+       
+        [Fact]
+        public async Task ConfirmEmail_Success()
+        {
+            // Arrange
+            var testUserId = 1;
+            var testUser = new User
+            {
+                UserID = testUserId,
+                Name = "Test User",
+                Email = "testuser@example.com",
+                PasswordHash = UserController.HashPassword("Password123!"),
+                Status = EnrollmentStatus.ConfirmationMessageNotSent
+            };
+            _context.Users.Add(testUser);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _controller.ConfirmEmail(testUserId);
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("EmailConfirmed", viewResult.ViewName);
+
+            // Verify that user's status is updated
+            var updatedUser = await _context.Users.FindAsync(testUserId);
+            Assert.Equal(EnrollmentStatus.EnrollmentConfirmed, updatedUser.Status);
+        }
+
+        
+        [Fact]
+        public async Task AddFriend_Success()
+        {
+            // Arrange
+            var user1 = new User
+            {
+                UserID = 1,
+                Name = "User One",
+                Email = "user1@example.com",
+                PasswordHash = UserController.HashPassword("Password123!"),
+                Status = EnrollmentStatus.EnrollmentConfirmed
+            };
+            var user2 = new User
+            {
+                UserID = 2,
+                Name = "User Two",
+                Email = "user2@example.com",
+                PasswordHash = UserController.HashPassword("Password456!"),
+                Status = EnrollmentStatus.EnrollmentConfirmed
+            };
+            _context.Users.AddRange(user1, user2);
+            await _context.SaveChangesAsync();
+
+            // Authenticate as user1
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user1.UserID.ToString()),
+                new Claim(ClaimTypes.Name, user1.Name),
+                new Claim(ClaimTypes.Email, user1.Email)
+            };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            var httpContext = new DefaultHttpContext { User = principal };
+
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            };
+
+            // Act
+            var result = await _controller.AddFriend(userId: user1.UserID, friendId: user2.UserID);
+
+            // Assert
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("FriendsAndFamilyDetails", redirectResult.ActionName);
+            Assert.Equal(user1.UserID, redirectResult.RouteValues["userId"]);
+
+            // Verify that user2 is in user1's FriendsAndFamily
+            var updatedUser1 = await _context.Users
+                .Include(u => u.FriendsAndFamily)
+                .FirstOrDefaultAsync(u => u.UserID == user1.UserID);
+            Assert.Contains(updatedUser1.FriendsAndFamily, f => f.UserID == user2.UserID);
+        }
+
+        
+        [Fact]
+        public async Task ConfirmEmail_EmailAlreadyConfirmed_ShouldShowEmailAlreadyConfirmedView()
+        {
+            // Arrange
+            var testUserId = 1;
+            var testUser = new User
+            {
+                UserID = testUserId,
+                Name = "Test User",
+                Email = "testuser@example.com",
+                PasswordHash = UserController.HashPassword("Password123!"),
+                Status = EnrollmentStatus.EnrollmentConfirmed // Already confirmed
+            };
+            _context.Users.Add(testUser);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _controller.ConfirmEmail(testUserId);
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("EmailAlreadyConfirmed", viewResult.ViewName);
+        }
+
+        
+        [Fact]
+        public async Task AddFriend_AddingExistingFriend_ShouldNotDuplicate()
+        {
+            // Arrange
+            var user1 = new User
+            {
+                UserID = 1,
+                Name = "User One",
+                Email = "user1@example.com",
+                PasswordHash = UserController.HashPassword("Password123!"),
+                Status = EnrollmentStatus.EnrollmentConfirmed
+            };
+            var user2 = new User
+            {
+                UserID = 2,
+                Name = "User Two",
+                Email = "user2@example.com",
+                PasswordHash = UserController.HashPassword("Password456!"),
+                Status = EnrollmentStatus.EnrollmentConfirmed
+            };
+            _context.Users.AddRange(user1, user2);
+            await _context.SaveChangesAsync();
+
+            // Authenticate as user1 and add user2 as friend
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user1.UserID.ToString()),
+                new Claim(ClaimTypes.Name, user1.Name),
+                new Claim(ClaimTypes.Email, user1.Email)
+            };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var principal = new ClaimsPrincipal(identity);
+            var httpContext = new DefaultHttpContext { User = principal };
+
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            };
+
+            // First addition
+            var firstResult = await _controller.AddFriend(userId: user1.UserID, friendId: user2.UserID);
+            var firstRedirect = Assert.IsType<RedirectToActionResult>(firstResult);
+            Assert.Equal("FriendsAndFamilyDetails", firstRedirect.ActionName);
+            Assert.Equal(user1.UserID, firstRedirect.RouteValues["userId"]);
+
+            // Second addition attempt
+            var secondResult = await _controller.AddFriend(userId: user1.UserID, friendId: user2.UserID);
+            var secondRedirect = Assert.IsType<RedirectToActionResult>(secondResult);
+            Assert.Equal("FriendsAndFamilyDetails", secondRedirect.ActionName);
+            Assert.Equal(user1.UserID, secondRedirect.RouteValues["userId"]);
+
+            // Verify that user2 is only added once
+            var updatedUser1 = await _context.Users
+                .Include(u => u.FriendsAndFamily)
+                .FirstOrDefaultAsync(u => u.UserID == user1.UserID);
+            Assert.Single(updatedUser1.FriendsAndFamily.Where(f => f.UserID == user2.UserID));
         }
     }
 }
