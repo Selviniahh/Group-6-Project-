@@ -219,7 +219,7 @@ namespace Group6WebProject.Controllers
 
             sb.AppendLine("<p>We will notify you once your order has been shipped.</p>");
             sb.AppendLine("<p>Thank you for shopping with us!</p>");
-            sb.AppendLine("<p>Best regards,<br>Your Company Name</p>");
+            sb.AppendLine("<p>Best regards,<br>Group 6 Project</p>");
 
             return sb.ToString();
         }
