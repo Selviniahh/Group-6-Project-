@@ -29,6 +29,12 @@ ViewData["Title"] = "Game Details";
     <h4>Price:</h4> <p>@Model.Game.Price</p>
     <h3>Average Rating: @Model.AverageRating.ToString("0.0") / 5</h3>
 
+    <form asp-action="AddGameWishList" asp-controller="WishList" method="post" style="display:inline;">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="gameId" value="@Model.Game.Id"/>
+        <button type="submit" class="btn btn-primary">Add To Wishlist</button>
+    </form>
+
     <p>
         <strong>Rate this game:</strong>
     <form method="post" asp-action="RateGame">

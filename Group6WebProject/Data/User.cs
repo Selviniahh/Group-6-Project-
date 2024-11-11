@@ -42,5 +42,4 @@ public class User
     
     public ICollection<GameReview> Reviews { get; set; } = new List<GameReview>();
     public ICollection<User> FriendsAndFamily { get; set; } = new List<User>();
-
 }

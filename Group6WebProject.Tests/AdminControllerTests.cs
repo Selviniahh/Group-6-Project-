@@ -4,70 +4,81 @@ using Group6WebProject.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using Xunit;
+using NUnit.Framework; // Changed from Xunit to NUnit since your project uses NUnit
 using System;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 
 namespace Group6WebProject.Tests
 {
+    [TestFixture] // Add NUnit TestFixture attribute
     public class AdminControllerTests
     {
-        private readonly AdminController _controller;
-        private readonly ApplicationDbContext _dbContext;
+        private AdminController _controller;
+        private ApplicationDbContext _dbContext;
+        private DbContextOptions<ApplicationDbContext> _options;
 
-        // Constructor to initialize the test context
-        public AdminControllerTests()
+        [SetUp] // Changed from constructor to SetUp method for NUnit
+        public void Setup()
         {
-            // Set up the in-memory database for testing (with a unique database name for each test)
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())  // Use unique DB name for each test run
+            // Set up the in-memory database
+            _options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
-            // Create the DbContext with the in-memory database
-            _dbContext = new ApplicationDbContext(options);
+            // Create the DbContext
+            _dbContext = new ApplicationDbContext(_options);
 
-            // Seed the database with a test admin user
+            // Seed the database with test admin user
             _dbContext.Users.Add(new User
             {
                 UserID = 2,
                 Name = "Admin User",
                 Email = "admin@test.com",
-                PasswordHash = "hashedpassword", // Simulated password
+                PasswordHash = "hashedpassword",
                 IsAdmin = true
             });
             _dbContext.SaveChanges();
 
-            // Create the controller with the in-memory DbContext
+            // Create controller
             _controller = new AdminController(_dbContext);
 
-            // Set up a mock ClaimsPrincipal to simulate a logged-in user
-            var mockUser = new Mock<ClaimsPrincipal>();
-            mockUser.Setup(u => u.FindFirst(ClaimTypes.NameIdentifier)).Returns(new Claim(ClaimTypes.NameIdentifier, "2"));
+            // Setup mock user
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, "2"),
+                new Claim(ClaimTypes.Role, "Admin")
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
 
-            // Assign the mock user to the controller's HttpContext
             _controller.ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext { User = mockUser.Object }
+                HttpContext = new DefaultHttpContext { User = claimsPrincipal }
             };
         }
 
-        // Test 1: IsAdmin method should return true for an admin user
-        [Fact]
-        public void IsAdmin_ShouldReturnTrue_WhenUserIsAdmin()
+        [TearDown] // Add cleanup
+        public void TearDown()
         {
-            // Act: Call the IsAdmin method in the controller
-            var result = _controller.IsAdmin();
-
-            // Assert: Verify that the result is true because the user is an admin
-            Assert.True(result);
+            _dbContext.Database.EnsureDeleted();
+            _dbContext.Dispose();
         }
 
-        // Test 2: AddGame method should add a game when admin is authorized
-        [Fact]
+        [Test] // Changed from Fact to Test for NUnit
+        public void IsAdmin_ShouldReturnTrue_WhenUserIsAdmin()
+        {
+            // Act
+            var result = _controller.IsAdmin();
+
+            // Assert
+            Assert.That(result, Is.True); // NUnit assertion style
+        }
+
+        [Test]
         public void AddGame_ShouldAddGame_WhenAdminIsAuthorized()
         {
-            // Arrange: Create a new game to be added
+            // Arrange
             var newGame = new Game
             {
                 Id = 4,
@@ -82,22 +93,21 @@ namespace Group6WebProject.Tests
                 VideoUrl = "https://github.com/user-attachments/assets/30b28a29-06fd-4147-8b0e-5b79c9a4ef59"
             };
 
-            // Act: Add the new game using the controller method
+            // Act
             var result = _controller.AddGame(newGame);
 
-            // Assert: Ensure the game was added by querying the in-memory database
-            var addedGame = _dbContext.Games.FirstOrDefault(g => g.Id == newGame.Id); // Retrieve the game by ID
-            Assert.NotNull(addedGame);  // The game should not be null if it was added successfully
-            Assert.Equal(newGame.Title, addedGame.Title);  // Ensure the title matches
-
-            // Assert: Should redirect to "GameManagement" page
-            Assert.IsType<RedirectToActionResult>(result);
+            // Assert
+            Assert.That(result, Is.TypeOf<RedirectToActionResult>());
+            
+            var addedGame = _dbContext.Games.FirstOrDefault(g => g.Id == newGame.Id);
+            Assert.That(addedGame, Is.Not.Null);
+            Assert.That(addedGame.Title, Is.EqualTo(newGame.Title));
         }
-        // Test 3: AddGame method should return Forbid when the user is not an admin
-        [Fact]
+
+        [Test]
         public void AddGame_ShouldReturnForbid_WhenUserIsNotAdmin()
         {
-            // Arrange: Create a new game to be added
+            // Arrange
             var newGame = new Game
             {
                 Id = 4,
@@ -109,19 +119,24 @@ namespace Group6WebProject.Tests
                 ReleaseDate = new DateTime(2024, 1, 1)
             };
 
-            // Mocking the IsAdmin method to return false (simulate a non-admin user)
-            var mockUser = new Mock<ClaimsPrincipal>();
-            mockUser.Setup(u => u.IsInRole("Admin")).Returns(false);  // Simulate a non-admin user
-            _controller.ControllerContext = new ControllerContext()
+            // Setup non-admin user
+            var claims = new List<Claim>
             {
-                HttpContext = new DefaultHttpContext { User = mockUser.Object }
+                new Claim(ClaimTypes.NameIdentifier, "3"), // Different user ID
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = claimsPrincipal }
             };
 
-            // Act: Try to add the new game
+            // Act
             var result = _controller.AddGame(newGame);
 
-            // Assert: Should return a ForbidResult when the user is not an admin
-            Assert.IsType<ForbidResult>(result);
+            // Assert
+            Assert.That(result, Is.TypeOf<ForbidResult>());
         }
     }
 }
