@@ -7,24 +7,21 @@ namespace Group6WebProject.Data;
 
 public class ApplicationDbContext : DbContext
 {
-    public DbSet<MemberPreferences> MemberPreferences { get; set; }
-    public DbSet<User> Users { get; set; }
-    public DbSet<Profile> Profiles { get; set; }
-    public DbSet<Game> Games { get; set; }
-    public DbSet<Event> Events { get; set; }
-    public DbSet<GameReview> Reviews { get; set; }
-    public DbSet<GameRating> Ratings { get; set; }
-    public DbSet<Address> Addresses { get; set; }
-    public DbSet<WishlistItem> WishlistItems { get; set; }
-
-    public DbSet<EventRegister> EventRegister { get; set; }
-
-    public DbSet<Cart> Carts { get; set; }
-    public DbSet<CartItem> CartItems { get; set; }
-    public DbSet<CreditCard> CreditCards { get; set; }
-    public DbSet<Order> Orders { get; set; }
-    public DbSet<OrderItem> OrderItems { get; set; }
-
+    public virtual DbSet<MemberPreferences> MemberPreferences { get; set; }
+    public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<Profile> Profiles { get; set; }
+    public virtual DbSet<Game> Games { get; set; }
+    public virtual DbSet<Event> Events { get; set; }
+    public virtual DbSet<GameReview> Reviews { get; set; }
+    public virtual DbSet<GameRating> Ratings { get; set; }
+    public virtual DbSet<Address> Addresses { get; set; }
+    public virtual DbSet<WishlistItem> WishlistItems { get; set; }
+    public virtual DbSet<EventRegister> EventRegister { get; set; }
+    public virtual DbSet<Cart> Carts { get; set; }
+    public virtual DbSet<CartItem> CartItems { get; set; }
+    public virtual DbSet<CreditCard> CreditCards { get; set; }
+    public virtual DbSet<Order> Orders { get; set; }
+    public virtual DbSet<OrderItem> OrderItems { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
