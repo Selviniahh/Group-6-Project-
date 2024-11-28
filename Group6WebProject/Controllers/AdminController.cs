@@ -6,7 +6,6 @@ using System.Security.Claims;
 
 namespace Group6WebProject.Controllers
 {
-  
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _dbContext;
@@ -42,27 +41,24 @@ namespace Group6WebProject.Controllers
         // Game Management
         public IActionResult GameManagement()
         {
-            if (!IsAdmin())
-            {
-                return Forbid();
-            }
-
+            ViewBag.Genres = GetGenres();
+            ViewBag.Platforms = GetPlatforms();
             var games = _dbContext.Games.ToList();
             return View(games);
         }
 
-        
         [HttpPost]
         public IActionResult AddGame(Game game)
         {
-            if (!IsAdmin())
+            if (ModelState.IsValid)
             {
-                return Forbid();
+                _dbContext.Games.Add(game);
+                _dbContext.SaveChanges();
+                return RedirectToAction("GameManagement");
             }
-
-            _dbContext.Games.Add(game);
-            _dbContext.SaveChanges();
-            return RedirectToAction("GameManagement");
+            ViewBag.Genres = GetGenres();
+            ViewBag.Platforms = GetPlatforms();
+            return View("GameManagement", _dbContext.Games.ToList());
         }
 
         public IActionResult EditGame(int id)
@@ -70,11 +66,14 @@ namespace Group6WebProject.Controllers
             var game = _dbContext.Games.Find(id);
             if (game == null)
             {
-                Console.WriteLine("Game not found");
                 return NotFound();
             }
+
+            ViewBag.Genres = GetGenres();
+            ViewBag.Platforms = GetPlatforms();
             return View(game);
         }
+
 
 // POST: Admin/EditGame
         [HttpPost]
@@ -89,6 +88,7 @@ namespace Group6WebProject.Controllers
                 _dbContext.SaveChanges();
                 return RedirectToAction("GameManagement");
             }
+
             return View(game); // Return the view with the model if validation fails
         }
 
@@ -123,6 +123,7 @@ namespace Group6WebProject.Controllers
                 _dbContext.Games.Remove(game);
                 _dbContext.SaveChanges(); // Persist changes to the database
             }
+
             return RedirectToAction("GameManagement"); // Redirect back to the Game Management page
         }
 
@@ -150,58 +151,59 @@ namespace Group6WebProject.Controllers
             _dbContext.SaveChanges();
             return RedirectToAction("EventManagement");
         }
-        // GET: Display Edit Event Form
-public IActionResult EditEvent(int id)
-{
-    var eventItem = _dbContext.Events.Find(id);
-    if (eventItem == null)
-    {
-        return NotFound();
-    }
 
-    return View(eventItem);
-}
+        // GET: Display Edit Event Form
+        public IActionResult EditEvent(int id)
+        {
+            var eventItem = _dbContext.Events.Find(id);
+            if (eventItem == null)
+            {
+                return NotFound();
+            }
+
+            return View(eventItem);
+        }
 
 // POST: Edit Event
-[HttpPost]
-public IActionResult EditEvent(Event eventItem)
-{
-    if (ModelState.IsValid)
-    {
-        _dbContext.Events.Update(eventItem);
-        _dbContext.SaveChanges();
-        
-        return RedirectToAction("EventManagement");
-    }
+        [HttpPost]
+        public IActionResult EditEvent(Event eventItem)
+        {
+            if (ModelState.IsValid)
+            {
+                _dbContext.Events.Update(eventItem);
+                _dbContext.SaveChanges();
 
-    return View(eventItem); // Return to the view if validation fails
-}
+                return RedirectToAction("EventManagement");
+            }
+
+            return View(eventItem); // Return to the view if validation fails
+        }
+
 // GET: Display Delete Event Confirmation
-public IActionResult DeleteEvent(int id)
-{
-    var eventItem = _dbContext.Events.Find(id);
-    if (eventItem == null)
-    {
-        return NotFound();
-    }
+        public IActionResult DeleteEvent(int id)
+        {
+            var eventItem = _dbContext.Events.Find(id);
+            if (eventItem == null)
+            {
+                return NotFound();
+            }
 
-    return View(eventItem);
-}
+            return View(eventItem);
+        }
 
 // POST: Delete Event Confirmed
-[HttpPost]
-public IActionResult DeleteEventConfirmed(int id)
-{
-    var eventItem = _dbContext.Events.Find(id);
-    if (eventItem != null)
-    {
-        _dbContext.Events.Remove(eventItem);
-        _dbContext.SaveChanges();
-      
-    }
+        [HttpPost]
+        public IActionResult DeleteEventConfirmed(int id)
+        {
+            var eventItem = _dbContext.Events.Find(id);
+            if (eventItem != null)
+            {
+                _dbContext.Events.Remove(eventItem);
+                _dbContext.SaveChanges();
+            }
 
-    return RedirectToAction("EventManagement");
-}
+            return RedirectToAction("EventManagement");
+        }
 
         public IActionResult ApproveReview(int reviewId)
         {
@@ -253,7 +255,7 @@ public IActionResult DeleteEventConfirmed(int id)
             }
 
             review.ReviewStatus = "Rejected";
-          
+
 
             _dbContext.Reviews.Update(review);
             _dbContext.SaveChanges();
@@ -276,6 +278,39 @@ public IActionResult DeleteEventConfirmed(int id)
                 .ToList();
 
             return View(pendingReviews);
+        }
+
+        private List<string> GetGenres()
+        {
+            return new List<string>
+            {
+                "Action",
+                "Adventure",
+                "Role-Playing",
+                "Simulation",
+                "Strategy",
+                "Sports",
+                "Puzzle",
+                "Shooter",
+                "Horror",
+                "Other"
+            };
+        }
+
+        private List<string> GetPlatforms()
+        {
+            return new List<string>
+            {
+                "Windows",
+                "MacOS",
+                "Linux",
+                "PlayStation",
+                "Xbox",
+                "Nintendo Switch",
+                "Mobile",
+                "Web",
+                "Other"
+            };
         }
     }
 }

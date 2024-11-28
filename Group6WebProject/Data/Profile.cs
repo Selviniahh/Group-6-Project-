@@ -26,7 +26,9 @@ public class Profile
     public Gender? Gender { get; set; }
     
     [Display(Name = "Birth Date")]
+    [DataType(DataType.Date)]
     public DateTime? BirthDate { get; set; }
+
     
     [Display(Name = "Receive CVGS")]
     public bool ReceiveCvgs { get; set; }

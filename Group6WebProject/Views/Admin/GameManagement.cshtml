@@ -1,15 +1,16 @@
 ﻿@model List<Game>
 @{
-ViewBag.Title = "Game Management";
-Layout = "_Layout";
+    ViewBag.Title = "Game Management";
+    Layout = "_Layout";
 }
+<div asp-validation-summary="All" class="text-danger"></div>
 
 <h2>Game Management</h2>
 
 <form method="post" action="/Admin/AddGame" style="max-width: 600px; margin-bottom: 20px;">
     <div class="form-group">
         <label for="Title">Game Title</label>
-        <input type="text" id="Title" name="Title" required class="form-control" />
+        <input type="text" id="Title" name="Title" required class="form-control"/>
     </div>
 
     <div class="form-group">
@@ -19,29 +20,62 @@ Layout = "_Layout";
 
     <div class="form-group">
         <label for="ReleaseDate">Release Date</label>
-        <input type="date" id="ReleaseDate" name="ReleaseDate" required class="form-control" />
+        <input type="date" id="ReleaseDate" name="ReleaseDate" required class="form-control"/>
     </div>
 
     <div class="form-group">
         <label for="Genre">Genre</label>
-        <input type="text" id="Genre" name="Genre" required class="form-control" />
+        <select id="Genre" name="Genre" class="form-control">
+            <option value="">Select Genre</option>
+            @foreach (var genre in ViewBag.Genres)
+            {
+                <option value="@genre">@genre</option>
+            }
+        </select>
     </div>
 
     <div class="form-group">
         <label for="Price">Price</label>
-        <input type="text" id="Price" name="Price" required class="form-control" />
+        <input type="text" id="Price" name="Price" required class="form-control"/>
     </div>
 
     <div class="form-group">
         <label for="Platform">Platform</label>
-        <input type="text" id="Platform" name="Platform" required class="form-control" />
+        <select id="Platform" name="Platform" class="form-control">
+            <option value="">Select Platform</option>
+            @foreach (var platform in ViewBag.Platforms)
+            {
+                <option value="@platform">@platform</option>
+            }
+        </select>
     </div>
+
+    <!-- DownloadUrl -->
+    <div class="form-group">
+        <label for="DownloadUrl">Download URL</label>
+        <input type="text" id="DownloadUrl" name="DownloadUrl" class="form-control" />
+    </div>
+
+    <!-- ImageFileName -->
+    <div class="form-group">
+        <label for="ImageFileName">Image File Name</label>
+        <input type="text" id="ImageFileName" name="ImageFileName" class="form-control" />
+    </div>
+
+    <!-- VideoUrl -->
+    <div class="form-group">
+        <label for="VideoUrl">Video URL</label>
+        <input type="text" id="VideoUrl" name="VideoUrl" class="form-control" />
+    </div>
+
 
     <button type="submit" class="btn btn-primary">Add Game</button>
 </form>
 
-<table border="1" style="width: 100%; border-collapse: collapse;">
-    <thead>
+<!-- GameManagement.cshtml -->
+
+<table class="table table-striped table-bordered">
+    <thead class="thead-dark">
     <tr>
         <th>ID</th>
         <th>Title</th>
@@ -62,14 +96,13 @@ Layout = "_Layout";
         <td>@game.Description</td>
         <td>@game.ReleaseDate.ToString("yyyy-MM-dd")</td>
         <td>@game.Genre</td>
-        <td>@game.Price</td>
+        <td>@game.Price)</td>
         <td>@game.Platform</td>
         <td>
-            <a asp-action="EditGame" asp-route-id="@game.Id">Edit</a> |
-            <a asp-action="DeleteGame" asp-route-id="@game.Id">Delete</a>
+            <a asp-action="EditGame" asp-route-id="@game.Id" class="btn btn-sm btn-info">Edit</a>
+            <a asp-action="DeleteGame" asp-route-id="@game.Id" class="btn btn-sm btn-danger">Delete</a>
         </td>
     </tr>
     }
     </tbody>
 </table>
-

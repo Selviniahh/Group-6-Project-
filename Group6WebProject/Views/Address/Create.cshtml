@@ -63,7 +63,9 @@
                     <!-- Province/State -->
                     <div class="col-md-6 mb-3">
                         <label asp-for="Province" class="form-label"></label>
-                        <input asp-for="Province" class="form-control"/>
+                        <select asp-for="Province" class="form-control" asp-items="new SelectList(ViewBag.Provinces)">
+                            <option value="">Select Province</option>
+                        </select>
                         <span asp-validation-for="Province" class="text-danger"></span>
                     </div>
 
@@ -131,9 +133,11 @@
                 <div class="row">
                     <!-- Shipping Province/State -->
                     <div class="col-md-6 mb-3">
-                        <label asp-for="ShippingProvince" class="form-label"></label>
-                        <input asp-for="ShippingProvince" class="form-control"/>
-                        <span asp-validation-for="ShippingProvince" class="text-danger"></span>
+                        <label asp-for="Province" class="form-label"></label>
+                        <select asp-for="Province" class="form-control" asp-items="new SelectList(ViewBag.Provinces)">
+                            <option value="">Select Province</option>
+                        </select>
+                        <span asp-validation-for="Province" class="text-danger"></span>
                     </div>
 
                     <!-- Shipping Postal Code -->

@@ -29,9 +29,9 @@ namespace Group6WebProject.Controllers
         }
 
         // GET: Address/Create
-        public IActionResult Create(string returnUrl = null)
+        public IActionResult Create()
         {
-            ViewBag.ReturnUrl = returnUrl;
+            ViewBag.Provinces = GetProvinces();
             return View();
         }
 
@@ -61,21 +61,23 @@ namespace Group6WebProject.Controllers
                 {
                     return Redirect(returnUrl);
                 }
+
                 return RedirectToAction(nameof(Index));
             }
+
             return View(address);
         }
 
         // GET: Address/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id == null)
-                return NotFound();
-
             var address = await _context.Addresses.FindAsync(id);
-            if (address == null || address.UserId != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)))
+            if (address == null)
+            {
                 return NotFound();
+            }
 
+            ViewBag.Provinces = GetProvinces();
             return View(address);
         }
 
@@ -154,6 +156,26 @@ namespace Group6WebProject.Controllers
         private bool AddressExists(int id)
         {
             return _context.Addresses.Any(e => e.Id == id && e.UserId == int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+        }
+
+        private List<string> GetProvinces()
+        {
+            return new List<string>
+            {
+                "Alberta",
+                "British Columbia",
+                "Manitoba",
+                "New Brunswick",
+                "Newfoundland and Labrador",
+                "Nova Scotia",
+                "Ontario",
+                "Prince Edward Island",
+                "Quebec",
+                "Saskatchewan",
+                "Northwest Territories",
+                "Nunavut",
+                "Yukon"
+            };
         }
     }
 }

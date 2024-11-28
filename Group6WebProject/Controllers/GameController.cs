@@ -17,6 +17,49 @@ namespace Group6WebProject.Controllers
             _context = context;
         }
 
+        [Authorize]
+        public IActionResult MyGames()
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return RedirectToAction("Login", "User");
+            }
+
+            int userId = int.Parse(userIdClaim.Value);
+
+            // Get purchased games
+            var purchasedGames = _context.Orders
+                .Where(o => o.UserID == userId)
+                .SelectMany(o => o.OrderItems)
+                .Select(oi => oi.Game)
+                .Distinct()
+                .ToList();
+
+            var freeGames = _context.Games
+                .AsEnumerable() // Switch to in-memory processing
+                .Where(g =>
+                {
+                    // Remove the dollar sign if it exists
+                    string priceStr = g.Price.StartsWith("$") ? g.Price.Substring(1) : g.Price;
+
+                    // Attempt to parse the price to decimal
+                    if (decimal.TryParse(priceStr, out decimal price))
+                    {
+                        return price == 0.00m;
+                    }
+
+                    // If parsing fails, exclude the game from the result
+                    return false;
+                })
+                .ToList();
+
+            // Combine the lists and remove duplicates
+            var availableGames = purchasedGames.Union(freeGames).Distinct().ToList();
+
+            return View(availableGames);
+        }
+
         // GET: /Game/
         public async Task<IActionResult> Index(string searchString)
         {
