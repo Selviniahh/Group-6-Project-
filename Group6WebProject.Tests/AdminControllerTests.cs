@@ -3,22 +3,29 @@ using Group6WebProject.Models;
 using Group6WebProject.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Moq;
-using NUnit.Framework; // Changed from Xunit to NUnit since your project uses NUnit
-using System;
+using NUnit.Framework;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ViewEngines;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Moq;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Group6WebProject.Tests
 {
-    [TestFixture] // Add NUnit TestFixture attribute
+    [TestFixture]
     public class AdminControllerTests
     {
         private AdminController _controller;
         private ApplicationDbContext _dbContext;
         private DbContextOptions<ApplicationDbContext> _options;
 
-        [SetUp] // Changed from constructor to SetUp method for NUnit
+        // Mocks for the dependencies
+        private Mock<ICompositeViewEngine> _mockViewEngine;
+        private Mock<ITempDataProvider> _mockTempDataProvider;
+        private Mock<IServiceProvider> _mockServiceProvider;
+
+        [SetUp]
         public void Setup()
         {
             // Set up the in-memory database
@@ -40,10 +47,24 @@ namespace Group6WebProject.Tests
             });
             _dbContext.SaveChanges();
 
-            // Create controller
-            _controller = new AdminController(_dbContext, null, null, null);
+            // Create mocks for the dependencies
+            _mockViewEngine = new Mock<ICompositeViewEngine>();
+            _mockTempDataProvider = new Mock<ITempDataProvider>();
+            _mockServiceProvider = new Mock<IServiceProvider>();
 
-            // Setup mock user
+            // Mock the ViewEngine to return a valid view
+            _mockViewEngine.Setup(engine => engine.FindView(It.IsAny<ActionContext>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .Returns(ViewEngineResult.Found("FakeView", new FakeView()));
+
+            // Create the controller with the mocked dependencies
+            _controller = new AdminController(
+                _dbContext,
+                _mockViewEngine.Object,
+                _mockTempDataProvider.Object,
+                _mockServiceProvider.Object
+            );
+
+            // Set up mock user
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, "2"),
@@ -58,11 +79,22 @@ namespace Group6WebProject.Tests
             };
         }
 
-        [TearDown] // Add cleanup
+        [TearDown]
         public void TearDown()
         {
             _dbContext.Database.EnsureDeleted();
             _dbContext.Dispose();
+        }
+
+        // FakeView class to simulate view rendering
+        public class FakeView : IView
+        {
+            public string Path => "FakePath";
+
+            public Task RenderAsync(ViewContext context)
+            {
+                return context.Writer.WriteAsync("<html><body>Fake View Content</body></html>");
+            }
         }
 
         [Test] // Changed from Fact to Test for NUnit
@@ -98,7 +130,7 @@ namespace Group6WebProject.Tests
 
             // Assert
             Assert.That(result, Is.TypeOf<RedirectToActionResult>());
-            
+
             var addedGame = _dbContext.Games.FirstOrDefault(g => g.Id == newGame.Id);
             Assert.That(addedGame, Is.Not.Null);
             Assert.That(addedGame.Title, Is.EqualTo(newGame.Title));
@@ -137,6 +169,140 @@ namespace Group6WebProject.Tests
 
             // Assert
             Assert.That(result, Is.TypeOf<ForbidResult>());
+        }
+
+        //NEW TESTS FOR ITERATION 3
+        //1
+        [Test]
+        public async Task GenerateGameListReport_ReturnsPdfFile()
+        {
+            _dbContext.Games.AddRange(new List<Game>
+            {
+                new Game { Id = 1, Title = "Game 1", Description = "Description 1", Genre = "Action", Price = "$10", Platform = "PC", ReleaseDate = DateTime.Now },
+                new Game { Id = 2, Title = "Game 2", Description = "Description 2", Genre = "Adventure", Price = "$20", Platform = "Console", ReleaseDate = DateTime.Now }
+            });
+            _dbContext.SaveChanges();
+
+            var result = await _controller.GenerateGameListReport("pdf");
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.TypeOf<FileContentResult>());
+
+            var fileResult = result as FileContentResult;
+            Assert.That(fileResult.ContentType, Is.EqualTo("application/pdf"));
+            Assert.That(fileResult.FileDownloadName, Is.EqualTo("GameListReport.pdf"));
+            Assert.That(fileResult.FileContents, Is.Not.Null);
+            Assert.That(fileResult.FileContents.Length, Is.GreaterThan(0));
+        }
+
+        //2
+        [Test]
+        public async Task GenerateGameListReport_ReturnsExcelFile()
+        {
+            _dbContext.Games.AddRange(new List<Game>
+            {
+                new Game { Id = 1, Title = "Game 1", Description = "Description 1", Genre = "Action", Price = "$10", Platform = "PC", ReleaseDate = DateTime.Now },
+                new Game { Id = 2, Title = "Game 2", Description = "Description 2", Genre = "Adventure", Price = "$20", Platform = "Console", ReleaseDate = DateTime.Now }
+            });
+            _dbContext.SaveChanges();
+
+            var result = await _controller.GenerateGameListReport("excel");
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.TypeOf<FileContentResult>());
+
+            var fileResult = result as FileContentResult;
+            Assert.That(fileResult.ContentType, Is.EqualTo("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            Assert.That(fileResult.FileDownloadName, Is.EqualTo("GameListReport.xlsx"));
+            Assert.That(fileResult.FileContents, Is.Not.Null);
+            Assert.That(fileResult.FileContents.Length, Is.GreaterThan(0));
+        }
+
+
+        //3
+        [Test]
+        public async Task GenerateGameDetailReport_ReturnsPdfFile()
+        {
+            var user = _dbContext.Users.First(u => u.UserID == 2); // Get existing user
+
+            var game = new Game
+            {
+                Id = 1,
+                Title = "Game 1",
+                Description = "Description 1",
+                Genre = "Action",
+                Price = "$10",
+                Platform = "PC",
+                ReleaseDate = DateTime.Now,
+                Reviews = new List<GameReview>
+                {
+                    new GameReview
+                    {
+                        GameReviewID = 1,
+                        UserID = user.UserID,
+                        ReviewText = "Great game!",
+                        SubmissionDate = DateTime.Now,
+                        ReviewStatus = "Approved",
+                        User = user // Use existing user
+                    }
+                }
+            };
+            _dbContext.Games.Add(game);
+            _dbContext.SaveChanges();
+
+            var result = await _controller.GenerateGameDetailReport(game.Id, "pdf");
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.TypeOf<FileContentResult>());
+
+            var fileResult = result as FileContentResult;
+            Assert.That(fileResult.ContentType, Is.EqualTo("application/pdf"));
+            Assert.That(fileResult.FileDownloadName, Is.EqualTo($"GameDetailReport_{game.Title}.pdf"));
+            Assert.That(fileResult.FileContents, Is.Not.Null);
+            Assert.That(fileResult.FileContents.Length, Is.GreaterThan(0));
+        }
+
+        //4
+        [Test]
+        public async Task GenerateGameDetailReport_ReturnsExcelFile()
+        {
+            var user = _dbContext.Users.First(u => u.UserID == 2); // Get existing user
+
+            var game = new Game
+            {
+                Id = 1,
+                Title = "Game 1",
+                Description = "Description 1",
+                Genre = "Action",
+                Price = "$10",
+                Platform = "PC",
+                ReleaseDate = DateTime.Now,
+                Reviews = new List<GameReview>
+                {
+                    new GameReview
+                    {
+                        GameReviewID = 1,
+                        UserID = user.UserID,
+                        ReviewText = "Great game!",
+                        SubmissionDate = DateTime.Now,
+                        ReviewStatus = "Approved",
+                        User = user // Use existing user
+                    }
+                }
+            };
+            _dbContext.Games.Add(game);
+            _dbContext.SaveChanges();
+
+            var result = await _controller.GenerateGameDetailReport(game.Id, "excel");
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.TypeOf<FileContentResult>());
+
+            var fileResult = result as FileContentResult;
+            Assert.That(fileResult.ContentType, Is.EqualTo("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            Assert.That(fileResult.FileDownloadName, Is.EqualTo($"GameDetailReport_{game.Title}.xlsx"));
+            Assert.That(fileResult.FileContents, Is.Not.Null);
+            Assert.That(fileResult.FileContents.Length, Is.GreaterThan(0));
         }
     }
 }

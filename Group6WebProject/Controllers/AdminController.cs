@@ -31,12 +31,11 @@ namespace Group6WebProject.Controllers
         }
 
 
-        // Helper method to render a view to string
         private async Task<string> RenderViewToStringAsync(string viewName, object model)
         {
             var httpContext = new DefaultHttpContext { RequestServices = _serviceProvider };
             var routeData = new RouteData();
-            routeData.Values["controller"] = "Admin"; // Ensure the controller name is set
+            routeData.Values["controller"] = "Admin";
             var actionContext = new ActionContext(httpContext, routeData, new ActionDescriptor());
 
             using (var sw = new StringWriter())
@@ -70,7 +69,6 @@ namespace Group6WebProject.Controllers
             }
         }
 
-        // Generate Game List Report
         public async Task<IActionResult> GenerateGameListReport(string format)
         {
             var games = await _dbContext.Games.ToListAsync();
@@ -79,7 +77,6 @@ namespace Group6WebProject.Controllers
             {
                 var htmlContent = await RenderViewToStringAsync("GameListReport", games);
 
-                // Generate PDF using SelectPdf
                 HtmlToPdf converter = new HtmlToPdf();
                 PdfDocument doc = converter.ConvertHtmlString(htmlContent);
 
@@ -90,12 +87,10 @@ namespace Group6WebProject.Controllers
             }
             else if (format == "excel")
             {
-                // Generate Excel using ClosedXML
                 using (var workbook = new XLWorkbook())
                 {
                     var worksheet = workbook.Worksheets.Add("Games");
 
-                    // Add headers
                     worksheet.Cell(1, 1).Value = "Title";
                     worksheet.Cell(1, 2).Value = "Description";
                     worksheet.Cell(1, 3).Value = "Genre";
@@ -103,7 +98,6 @@ namespace Group6WebProject.Controllers
                     worksheet.Cell(1, 5).Value = "Platform";
                     worksheet.Cell(1, 6).Value = "Release Date";
 
-                    // Add data
                     int row = 2;
                     foreach (var game in games)
                     {
@@ -145,7 +139,7 @@ namespace Group6WebProject.Controllers
             {
                 var htmlContent = await RenderViewToStringAsync("GameDetailReport", game);
 
-                // Generate PDF using SelectPdf
+                // Generate the perfect looking PDF 
                 HtmlToPdf converter = new HtmlToPdf();
                 PdfDocument doc = converter.ConvertHtmlString(htmlContent);
 
@@ -231,7 +225,7 @@ namespace Group6WebProject.Controllers
             return false;
         }
 
-        // Admin Dashboard (Only accessible by admin users)
+        // Admin Dashboard
         public IActionResult Index()
         {
             if (!IsAdmin())
@@ -254,6 +248,11 @@ namespace Group6WebProject.Controllers
         [HttpPost]
         public IActionResult AddGame(Game game)
         {
+            if (!IsAdmin())
+            {
+                return Forbid();
+            }
+            
             if (ModelState.IsValid)
             {
                 _dbContext.Games.Add(game);
