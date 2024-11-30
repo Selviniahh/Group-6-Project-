@@ -1,0 +1,64 @@
+@model Group6WebProject.Models.Game
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Game Detail Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h2, h3, h4 {
+            text-align: center;
+        }
+
+        .section {
+            margin: 20px;
+        }
+
+        .section p {
+            margin: 5px 0;
+        }
+
+        .reviews ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .reviews li {
+            border-bottom: 1px solid #dddddd;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+<body>
+<h2>Game Detail Report</h2>
+
+<div class="section">
+    <h3>@Model.Title</h3>
+    <p><strong>Description:</strong> @Model.Description</p>
+    <p><strong>Genre:</strong> @Model.Genre</p>
+    <p><strong>Price:</strong> @Model.Price</p>
+    <p><strong>Platform:</strong> @Model.Platform</p>
+    <p><strong>Release Date:</strong> @Model.ReleaseDate.ToString("yyyy-MM-dd")</p>
+</div>
+
+@if (Model.Reviews != null && Model.Reviews.Any())
+{
+    <div class="section reviews">
+        <h4>Reviews</h4>
+        <ul>
+            @foreach (var review in Model.Reviews)
+            {
+                <li>
+                    <strong>@review.User.Name</strong> (@review.SubmissionDate.ToString("yyyy-MM-dd"))<br />
+                    @review.ReviewText
+                </li>
+            }
+        </ul>
+    </div>
+}
+</body>
+</html>

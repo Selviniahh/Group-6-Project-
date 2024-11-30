@@ -1,0 +1,58 @@
+@model IEnumerable<Group6WebProject.Models.Game>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Game List Report</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: Arial, sans-serif;
+        }
+
+        th, td {
+            border: 1px solid #dddddd;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        h2 {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+<h2>Game List Report</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Genre</th>
+        <th>Price</th>
+        <th>Platform</th>
+        <th>Release Date</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var game in Model)
+    {
+        <tr>
+            <td>@game.Title</td>
+            <td>@game.Description</td>
+            <td>@game.Genre</td>
+            <td>@game.Price</td>
+            <td>@game.Platform</td>
+            <td>@game.ReleaseDate.ToString("yyyy-MM-dd")</td>
+        </tr>
+    }
+    </tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,27 @@
+@{
+ViewData["Title"] = "Reports";
+Layout = "_Layout";
+}
+
+<h2>Reports</h2>
+
+<p>Select a report to generate:</p>
+
+<h3>Game List Report</h3>
+<a asp-action="GenerateGameListReport" asp-route-format="pdf" class="btn btn-primary">Download PDF</a>
+<a asp-action="GenerateGameListReport" asp-route-format="excel" class="btn btn-primary">Download Excel</a>
+
+<h3>Game Detail Report</h3>
+<form asp-action="GenerateGameDetailReport" method="get">
+    <div class="form-group">
+        <label for="gameId">Select a Game</label>
+        <select name="gameId" id="gameId" class="form-control" style="width: 300px;">
+            @foreach (var game in ViewBag.Games as List<Group6WebProject.Models.Game>)
+            {
+            <option value="@game.Id">@game.Title</option>
+            }
+        </select>
+    </div>
+    <button type="submit" name="format" value="pdf" class="btn btn-primary">Download PDF</button>
+    <button type="submit" name="format" value="excel" class="btn btn-primary">Download Excel</button>
+</form>

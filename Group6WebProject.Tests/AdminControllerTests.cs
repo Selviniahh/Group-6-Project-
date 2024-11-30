@@ -41,7 +41,7 @@ namespace Group6WebProject.Tests
             _dbContext.SaveChanges();
 
             // Create controller
-            _controller = new AdminController(_dbContext);
+            _controller = new AdminController(_dbContext, null, null, null);
 
             // Setup mock user
             var claims = new List<Claim>
