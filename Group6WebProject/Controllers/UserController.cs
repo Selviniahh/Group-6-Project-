@@ -37,7 +37,7 @@ public class UserController : Controller
     {
         return View();
     }
-
+    
     [HttpPost]
     public async Task<ViewResult> ForgetPassword(ForgetPasswordViewModel model)
     {

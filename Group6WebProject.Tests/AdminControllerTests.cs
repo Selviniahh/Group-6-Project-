@@ -17,11 +17,14 @@ namespace Group6WebProject.Tests
     public class AdminControllerTests
     {
         private AdminController _controller;
+        
         private ApplicationDbContext _dbContext;
         private DbContextOptions<ApplicationDbContext> _options;
+  
 
         // Mocks for the dependencies
         private Mock<ICompositeViewEngine> _mockViewEngine;
+        private Mock<IHttpContextAccessor> _mockHttpContextAccessor;
         private Mock<ITempDataProvider> _mockTempDataProvider;
         private Mock<IServiceProvider> _mockServiceProvider;
 
@@ -51,6 +54,8 @@ namespace Group6WebProject.Tests
             _mockViewEngine = new Mock<ICompositeViewEngine>();
             _mockTempDataProvider = new Mock<ITempDataProvider>();
             _mockServiceProvider = new Mock<IServiceProvider>();
+            _mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
+
 
             // Mock the ViewEngine to return a valid view
             _mockViewEngine.Setup(engine => engine.FindView(It.IsAny<ActionContext>(), It.IsAny<string>(), It.IsAny<bool>()))
@@ -61,7 +66,8 @@ namespace Group6WebProject.Tests
                 _dbContext,
                 _mockViewEngine.Object,
                 _mockTempDataProvider.Object,
-                _mockServiceProvider.Object
+                _mockServiceProvider.Object,
+                _mockHttpContextAccessor.Object
             );
 
             // Set up mock user

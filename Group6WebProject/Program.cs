@@ -13,7 +13,7 @@ builder.Configuration.AddEnvironmentVariables();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 

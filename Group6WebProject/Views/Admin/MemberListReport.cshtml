@@ -1,10 +1,30 @@
-﻿@model IEnumerable<Group6WebProject.Data.User>
+@model IEnumerable<Group6WebProject.Data.User>
 
 
 @{
     ViewBag.Title = "title";
-    Layout = "_Layout";
 }
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: Arial, sans-serif;
+    }
+
+    th, td {
+        border: 1px solid #dddddd;
+        padding: 8px;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    h2 {
+        text-align: center;
+        font-family: Arial, sans-serif;
+    }
+</style>
 
 <table>
     <thead>

@@ -21,53 +21,57 @@ namespace Group6WebProject.Controllers
         private readonly ICompositeViewEngine _viewEngine;
         private readonly ITempDataProvider _tempDataProvider;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AdminController(ApplicationDbContext context, ICompositeViewEngine viewEngine, ITempDataProvider tempDataProvider, IServiceProvider serviceProvider)
+        public AdminController(ApplicationDbContext context, ICompositeViewEngine viewEngine, ITempDataProvider tempDataProvider, IServiceProvider serviceProvider, IHttpContextAccessor httpContext)
         {
             _dbContext = context;
             _viewEngine = viewEngine;
             _tempDataProvider = tempDataProvider;
             _serviceProvider = serviceProvider;
+            _httpContextAccessor = httpContext;
         }
 
 
         private async Task<string> RenderViewToStringAsync(string viewName, object model)
         {
-            var httpContext = new DefaultHttpContext { RequestServices = _serviceProvider };
+            // Ensure the HttpContext has the necessary services
+            var httpContext = _httpContextAccessor.HttpContext ?? new DefaultHttpContext { RequestServices = _serviceProvider };
+
+            // Create a new RouteData and set the controller to "Admin"
             var routeData = new RouteData();
             routeData.Values["controller"] = "Admin";
+
+            // Create the ActionContext with the specified route data
             var actionContext = new ActionContext(httpContext, routeData, new ActionDescriptor());
+
+            // Find the view using the view engine
+            var viewResult = _viewEngine.FindView(actionContext, viewName, isMainPage: false);
+
+            if (!viewResult.Success)
+            {
+                var searchedLocations = string.Join(Environment.NewLine, viewResult.SearchedLocations);
+                throw new InvalidOperationException($"View '{viewName}' not found. Searched locations:{Environment.NewLine}{searchedLocations}");
+            }
 
             using (var sw = new StringWriter())
             {
-                var viewResult = _viewEngine.FindView(actionContext, viewName, isMainPage: false);
+                // Create the ViewDataDictionary and TempDataDictionary
+                var viewData = new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary()) { Model = model };
+                var tempData = new TempDataDictionary(httpContext, _tempDataProvider);
 
-                if (!viewResult.Success)
-                {
-                    throw new FileNotFoundException($"View {viewName} not found.");
-                }
+                // Create the ViewContext
+                var viewContext = new ViewContext(actionContext, viewResult.View, viewData, tempData, sw, new HtmlHelperOptions());
 
-                var viewDictionary = new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary())
-                {
-                    Model = model
-                };
-
-                var tempData = new TempDataDictionary(actionContext.HttpContext, _tempDataProvider);
-
-                var viewContext = new ViewContext(
-                    actionContext,
-                    viewResult.View,
-                    viewDictionary,
-                    tempData,
-                    sw,
-                    new HtmlHelperOptions()
-                );
-
+                // Render the view to the StringWriter
                 await viewResult.View.RenderAsync(viewContext);
 
+                // Return the rendered view as a string
                 return sw.ToString();
             }
         }
+
+
 
         public async Task<IActionResult> GenerateGameListReport(string format)
         {
@@ -123,62 +127,62 @@ namespace Group6WebProject.Controllers
         }
         
         // Generate Member List Report
-        public async Task<IActionResult> GenerateMemberListReport(int UserID, string format)
+public async Task<IActionResult> GenerateMemberListReport(string format)
+{
+    // Fetch all users
+    var members = await _dbContext.Users.ToListAsync();
+
+    if (format == "pdf")
+    {
+        // Pass the users to the view and render it as HTML
+        var htmlContent = await RenderViewToStringAsync("MemberListReport", members);
+
+        // Convert the HTML to PDF
+        HtmlToPdf converter = new HtmlToPdf();
+        PdfDocument doc = converter.ConvertHtmlString(htmlContent);
+
+        var pdfBytes = doc.Save();
+        doc.Close();
+
+        return File(pdfBytes, "application/pdf", "MemberListReport.pdf");
+    }
+    else if (format == "excel")
+    {
+        using (var workbook = new XLWorkbook())
         {
-            var members = await _dbContext.Users
-                .Select(u => new
-                {
-                    u.UserID,
-                    u.Name,
-                    u.Email,
-                    u.IsAdmin
-                })
-                .ToListAsync();
+            var worksheet = workbook.Worksheets.Add("Members");
 
-            if (format == "pdf")
+            // Add headers
+            worksheet.Cell(1, 1).Value = "Member ID";
+            worksheet.Cell(1, 2).Value = "Display Name";
+            worksheet.Cell(1, 3).Value = "Email";
+            worksheet.Cell(1, 4).Value = "Is Admin";
+
+            // Add user data
+            int row = 2;
+            foreach (var member in members)
             {
-                var htmlContent = await RenderViewToStringAsync("MemberListReport", members);
-
-                HtmlToPdf converter = new HtmlToPdf();
-                PdfDocument doc = converter.ConvertHtmlString(htmlContent);
-
-                var pdfBytes = doc.Save();
-                doc.Close();
-
-                return File(pdfBytes, "application/pdf", "MemberListReport.pdf");
-            }
-            else if (format == "excel")
-            {
-                using (var workbook = new XLWorkbook())
-                {
-                    var worksheet = workbook.Worksheets.Add("Members");
-
-                    worksheet.Cell(1, 1).Value = "Member ID";
-                    worksheet.Cell(1, 2).Value = "Display Name";
-                    worksheet.Cell(1, 3).Value = "Email";
-                    worksheet.Cell(1, 5).Value = "Is Admin";
-
-                    int row = 2;
-                    foreach (var member in members)
-                    {
-                        worksheet.Cell(row, 1).Value = member.UserID;
-                        worksheet.Cell(row, 2).Value = member.Name;
-                        worksheet.Cell(row, 3).Value = member.Email;
-                        worksheet.Cell(row, 5).Value = member.IsAdmin;
-                        row++;
-                    }
-
-                    using (var stream = new MemoryStream())
-                    {
-                        workbook.SaveAs(stream);
-                        var content = stream.ToArray();
-                        return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "MemberListReport.xlsx");
-                    }
-                }
+                worksheet.Cell(row, 1).Value = member.UserID;
+                worksheet.Cell(row, 2).Value = member.Name;
+                worksheet.Cell(row, 3).Value = member.Email;
+                worksheet.Cell(row, 4).Value = member.IsAdmin;
+                row++;
             }
 
-            return RedirectToAction("Reports");
+            using (var stream = new MemoryStream())
+            {
+                workbook.SaveAs(stream);
+                var content = stream.ToArray();
+
+                return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "MemberListReport.xlsx");
+            }
         }
+    }
+
+    // Redirect to another action if the format is not recognized
+    return RedirectToAction("Reports");
+}
+
 
 // Generate Member Detail Report
 public async Task<IActionResult> GenerateMemberDetailReport(int userId, string format)
@@ -359,8 +363,68 @@ public async Task<IActionResult> GenerateMemberDetailReport(int userId, string f
             }
 
             return RedirectToAction("Reports");
+        } 
+        public async Task<IActionResult> GenerateWishlistReport(string format)
+        {
+            // Fetch all users and their wishlist items
+            var userWishlists = await _dbContext.Users
+                .Include(u => u.WishlistItems)
+                .ThenInclude(w => w.Game)    
+                .ToListAsync();
+
+
+            if (format == "pdf")
+            {
+                // Create the HTML content for the PDF
+                var htmlContent = await RenderViewToStringAsync("WishlistReport", userWishlists);
+
+                HtmlToPdf converter = new HtmlToPdf();
+                PdfDocument doc = converter.ConvertHtmlString(htmlContent);
+
+                var pdfBytes = doc.Save();
+                doc.Close();
+
+                return File(pdfBytes, "application/pdf", "WishlistReport.pdf");
+            }
+            else if (format == "excel")
+            {
+                using (var workbook = new XLWorkbook())
+                {
+                    var worksheet = workbook.Worksheets.Add("Wishlists");
+
+                    // Add headers
+                    worksheet.Cell(1, 1).Value = "User Name";
+                    worksheet.Cell(1, 2).Value = "Game Title";
+                    worksheet.Cell(1, 3).Value = "Game Genre";
+                    worksheet.Cell(1, 4).Value = "Is Public";
+
+                    int row = 2;
+                    foreach (var user in userWishlists)
+                    {
+                        if (user.WishlistItems != null && user.WishlistItems.Any())
+                        {
+                            foreach (var wishlistItem in user.WishlistItems)
+                            {
+                                worksheet.Cell(row, 1).Value = user.Name;
+                                worksheet.Cell(row, 2).Value = wishlistItem.Game.Title;
+                                worksheet.Cell(row, 3).Value = wishlistItem.Game.Genre;
+                                worksheet.Cell(row, 4).Value = wishlistItem.IsPublic ? "Yes" : "No";
+                                row++;
+                            }
+                        }
+                    }
+
+                    using (var stream = new MemoryStream())
+                    {
+                        workbook.SaveAs(stream);
+                        var content = stream.ToArray();
+                        return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "WishlistReport.xlsx");
+                    }
+                }
+            }
+
+            return RedirectToAction("WishListIndex");
         }
-        
 
         public IActionResult Reports()
         {

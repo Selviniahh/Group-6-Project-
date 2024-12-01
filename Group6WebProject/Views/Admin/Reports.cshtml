@@ -3,19 +3,18 @@ ViewData["Title"] = "Reports";
 Layout = "_Layout";
 }
 
-<h2>Reports</h2>
+<h1>Reports</h1>
 
-<p>Select a report to generate:</p>
-
-<h3>Game List Report</h3>
+<h2>Game List Report</h2>
+<p>Generate a list of all the games:</p>
 <a asp-action="GenerateGameListReport" asp-route-format="pdf" class="btn btn-primary">Download PDF</a>
 <a asp-action="GenerateGameListReport" asp-route-format="excel" class="btn btn-primary">Download Excel</a>
-
-<h3>Game Detail Report</h3>
+<br><br/>
+<h2>Game Detail Report</h2>
 <form asp-action="GenerateGameDetailReport" method="get">
     <div class="form-group">
         <label for="gameId">Select a Game</label>
-        <select name="gameId" id="gameId" class="form-control" style="width: 300px;">
+        <select name="gameId" id="gameId" class="form-control" style="width: 300px; margin-bottom: 15px">
             @foreach (var game in ViewBag.Games as List<Group6WebProject.Models.Game>)
             {
                 <option value="@game.Id">@game.Title</option>
@@ -23,25 +22,30 @@ Layout = "_Layout";
         </select>
     </div>
     <button type="submit" name="format" value="pdf" class="btn btn-primary">Download PDF</button>
-    <button type="submit" name="format" value="excel" class="btn btn-primary">Download Excel</button>
+     <button type="submit" name="format" value="excel" class="btn btn-primary">Download Excel</button>
 </form>
-
+<br><br/>
+<h2>Wishlist Report</h2>
+<p>Generate a report of users and wishlist items:</p>
+<a asp-action="GenerateWishlistReport" asp-route-format="pdf" class="btn btn-primary">Download PDF</a>
+<a asp-action="GenerateWishlistReport" asp-route-format="excel" class="btn btn-primary">Download Excel</a>
+<br><br/>
 <h3>Member List Report</h3>
 <a asp-action="GenerateMemberListReport" asp-route-format="pdf" class="btn btn-primary">Download PDF</a>
 <a asp-action="GenerateMemberListReport" asp-route-format="excel" class="btn btn-primary">Download Excel</a>
-
+<br><br/>
 <h3>Member Detail Report</h3>
-    <form asp-action="GenerateMemberDetailReport" method="get">
-        <div class="form-group">
-            <label for="UserId">Select a User ID</label>
-            <select name="userId" id="userId" class="form-control" style="width: 300px;">
-                @foreach (var users in ViewBag.Users as List<Group6WebProject.Data.User>)
-                {
+<form asp-action="GenerateMemberDetailReport" method="get">
+    <div class="form-group">
+        <label for="UserId">Select a User ID</label>
+        <select name="userId" id="userId" class="form-control" style="width: 300px; margin-bottom: 15px">
+            @foreach (var users in ViewBag.Users as List<Group6WebProject.Data.User>)
+            {
                 <option value="@users.UserID">@users.Name</option>
-                }
-            </select>
-        </div>
-        <button type="submit" name="format" value="pdf" class="btn btn-primary">Download PDF</button>
-        <button type="submit" name="format" value="excel" class="btn btn-primary">Download Excel</button>
+            }
+        </select>
+    </div>
+    <button type="submit" name="format" value="pdf" class="btn btn-primary">Download PDF</button>
+    <button type="submit" name="format" value="excel" class="btn btn-primary">Download Excel</button>
     
 </form>

@@ -1,0 +1,59 @@
+@model List<Group6WebProject.Data.User>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wishlist Report</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: Arial, sans-serif;
+        }
+
+        th, td {
+            border: 1px solid #dddddd;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        h2 {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+<h1>Wishlist Report</h1>
+<table>
+    <thead>
+    <tr>
+        <th>User Name</th>
+        <th>Game Title</th>
+        <th>Game Genre</th>
+        <th>Is Public</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var user in Model)
+    {
+        if (user.WishlistItems != null && user.WishlistItems.Any())
+        {
+            foreach (var wishlistItem in user.WishlistItems)
+            {
+                <tr>
+                    <td>@user.Name</td>
+                    <td>@wishlistItem.Game?.Title</td>
+                    <td>@wishlistItem.Game?.Genre</td>
+                    <td>@(wishlistItem.IsPublic ? "Yes" : "No")</td>
+                </tr>
+            }
+        }
+    }
+    </tbody>
+</table>
+</body>
+</html>
