@@ -125,6 +125,7 @@ namespace Group6WebProject.Controllers
 
             return RedirectToAction("Reports");
         }
+        
         // Generate Member List Report
         public async Task<IActionResult> GenerateMemberListReport(string format)
         {
@@ -180,102 +181,119 @@ namespace Group6WebProject.Controllers
         }
 
 
-    // Generate Member Detail Report
-    public async Task<IActionResult> GenerateMemberDetailReport(int userId, string format)
+
+        public async Task<IActionResult> GenerateMemberDetailReport(int userId, string format)
+{
+    // Fetch the member details
+    var member = await _dbContext.Users
+        .Include(u => u.Reviews)
+        .ThenInclude(r => r.Game) // Ensure Game details are included
+        .FirstOrDefaultAsync(u => u.UserID == userId);
+
+    if (member == null)
     {
-        var member = await _dbContext.Users
-            .Include(u => u.Reviews) // Assuming the member has reviews
-            .Include(u => u.Events) // Assuming the member has events they attended
-            .FirstOrDefaultAsync(u => u.UserID == userId);
+        return NotFound();
+    }
 
-        if (member == null)
+    // Fetch events the user is registered for
+    var registeredEvents = await _dbContext.EventRegister
+        .Where(er => er.UserId == userId)
+        .Select(er => er.Event)
+        .ToListAsync();
+
+    if (format == "pdf")
+    {
+        // Pass to Razor view for PDF generation
+        var viewModel = new MemberDetailViewModel
         {
-            return NotFound();
-        }
+            User = member,
+            RegisteredEvents = registeredEvents
+        };
 
-        if (format == "pdf")
+        var htmlContent = await RenderViewToStringAsync("MemberDetailReport", viewModel);
+
+        // Convert HTML to PDF
+        HtmlToPdf converter = new HtmlToPdf();
+        PdfDocument doc = converter.ConvertHtmlString(htmlContent);
+
+        var pdfBytes = doc.Save();
+        doc.Close();
+
+        var fileName = $"MemberDetailReport_{member.Name}.pdf";
+        return File(pdfBytes, "application/pdf", fileName);
+    }
+    else if (format == "excel")
+    {
+        // Generate Excel file
+        using (var workbook = new XLWorkbook())
         {
-            var htmlContent = await RenderViewToStringAsync("MemberDetailReport", member);
+            // Add Member Details worksheet
+            var worksheet = workbook.Worksheets.Add("Member Detail");
 
-            // Convert HTML to PDF
-            HtmlToPdf converter = new HtmlToPdf();
-            PdfDocument doc = converter.ConvertHtmlString(htmlContent);
+            worksheet.Cell(1, 1).Value = "Member ID";
+            worksheet.Cell(1, 2).Value = member.UserID;
 
-            var pdfBytes = doc.Save();
-            doc.Close();
+            worksheet.Cell(2, 1).Value = "Display Name";
+            worksheet.Cell(2, 2).Value = member.Name;
 
-            var fileName = $"MemberDetailReport_{member.Name}.pdf";
-            return File(pdfBytes, "application/pdf", fileName);
-        }
-        else if (format == "excel")
-        {
-            using (var workbook = new XLWorkbook())
+            worksheet.Cell(3, 1).Value = "Email";
+            worksheet.Cell(3, 2).Value = member.Email;
+
+            worksheet.Cell(4, 1).Value = "Is Admin";
+            worksheet.Cell(4, 2).Value = member.IsAdmin;
+
+            // Add Reviews worksheet if present
+            if (member.Reviews != null && member.Reviews.Any())
             {
-                var worksheet = workbook.Worksheets.Add("Member Detail");
+                var reviewSheet = workbook.Worksheets.Add("Reviews");
+                reviewSheet.Cell(1, 1).Value = "Game Title";
+                reviewSheet.Cell(1, 2).Value = "Review Text";
+                reviewSheet.Cell(1, 3).Value = "Submission Date";
+                reviewSheet.Cell(1, 4).Value = "Review Status";
 
-                worksheet.Cell(1, 1).Value = "Member ID";
-                worksheet.Cell(1, 2).Value = member.UserID;
-
-                worksheet.Cell(2, 1).Value = "Display Name";
-                worksheet.Cell(2, 2).Value = member.Name;
-
-                worksheet.Cell(3, 1).Value = "Email";
-                worksheet.Cell(3, 2).Value = member.Email;
-                
-                worksheet.Cell(5, 1).Value = "Is Admin";
-                worksheet.Cell(5, 2).Value = member.IsAdmin;
-
-                if (member.Reviews != null && member.Reviews.Any())
+                int row = 2;
+                foreach (var review in member.Reviews)
                 {
-                    var reviewSheet = workbook.Worksheets.Add("Reviews");
-
-                    // Add review headers
-                    reviewSheet.Cell(1, 1).Value = "Game Title";
-                    reviewSheet.Cell(1, 2).Value = "Review Text";
-                    reviewSheet.Cell(1, 4).Value = "Date";
-
-                    int row = 2;
-                    foreach (var review in member.Reviews)
-                    {
-                        reviewSheet.Cell(row, 1).Value = review.Game.Title;
-                        reviewSheet.Cell(row, 2).Value = review.ReviewText;
-                        reviewSheet.Cell(row, 4).Value = review.SubmissionDate.ToString("yyyy-MM-dd");
-                        row++;
-                    }
-                }
-
-                if (member.Events != null && member.Events.Any())
-                {
-                    var eventSheet = workbook.Worksheets.Add("Events");
-
-                    // Add event headers
-                    eventSheet.Cell(1, 1).Value = "Event Title";
-                    eventSheet.Cell(1, 2).Value = "Event Date";
-                    eventSheet.Cell(1, 3).Value = "Location";
-
-                    int row = 2;
-                    foreach (var eventItem in member.Events)
-                    {
-                        eventSheet.Cell(row, 1).Value = eventItem.Name;
-                        eventSheet.Cell(row, 2).Value = eventItem.EventDate.ToString("yyyy-MM-dd");
-                        eventSheet.Cell(row, 3).Value = eventItem.Description;
-                        row++;
-                    }
-                }
-
-                using (var stream = new MemoryStream())
-                {
-                    workbook.SaveAs(stream);
-                    var content = stream.ToArray();
-
-                    var fileName = $"MemberDetailReport_{member.Name}.xlsx";
-                    return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+                    reviewSheet.Cell(row, 1).Value = review.Game?.Title ?? "N/A";
+                    reviewSheet.Cell(row, 2).Value = review.ReviewText;
+                    reviewSheet.Cell(row, 3).Value = review.SubmissionDate.ToString("yyyy-MM-dd");
+                    reviewSheet.Cell(row, 4).Value = review.ReviewStatus;
+                    row++;
                 }
             }
-        }
 
-        return RedirectToAction("Reports");
+            // Add Registered Events worksheet if present
+            if (registeredEvents != null && registeredEvents.Any())
+            {
+                var eventSheet = workbook.Worksheets.Add("Registered Events");
+                eventSheet.Cell(1, 1).Value = "Event Title";
+                eventSheet.Cell(1, 2).Value = "Event Date";
+                eventSheet.Cell(1, 3).Value = "Description";
+
+                int row = 2;
+                foreach (var eventItem in registeredEvents)
+                {
+                    eventSheet.Cell(row, 1).Value = eventItem.Name;
+                    eventSheet.Cell(row, 2).Value = eventItem.EventDate.ToString("yyyy-MM-dd");
+                    eventSheet.Cell(row, 3).Value = eventItem.Description;
+                    row++;
+                }
+            }
+
+            // Save workbook to memory stream and return as file
+            using (var stream = new MemoryStream())
+            {
+                workbook.SaveAs(stream);
+                var content = stream.ToArray();
+
+                var fileName = $"MemberDetailReport_{member.Name}.xlsx";
+                return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+        }
     }
+
+    return RedirectToAction("Reports");
+}
 
         // Generate Game Detail Report
         public async Task<IActionResult> GenerateGameDetailReport(int gameId, string format)
