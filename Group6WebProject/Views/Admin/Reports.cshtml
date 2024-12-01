@@ -31,10 +31,12 @@ Layout = "_Layout";
 <a asp-action="GenerateWishlistReport" asp-route-format="excel" class="btn btn-primary">Download Excel</a>
 <br><br/>
 <h3>Member List Report</h3>
+<p>Generate a list of all users:</p>
 <a asp-action="GenerateMemberListReport" asp-route-format="pdf" class="btn btn-primary">Download PDF</a>
 <a asp-action="GenerateMemberListReport" asp-route-format="excel" class="btn btn-primary">Download Excel</a>
 <br><br/>
 <h3>Member Detail Report</h3>
+<p>Generate a report of user details:</p>
 <form asp-action="GenerateMemberDetailReport" method="get">
     <div class="form-group">
         <label for="UserId">Select a User ID</label>
