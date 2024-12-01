@@ -121,6 +121,161 @@ namespace Group6WebProject.Controllers
 
             return RedirectToAction("Reports");
         }
+        
+        // Generate Member List Report
+        public async Task<IActionResult> GenerateMemberListReport(int UserID, string format)
+        {
+            var members = await _dbContext.Users
+                .Select(u => new
+                {
+                    u.UserID,
+                    u.Name,
+                    u.Email,
+                    u.IsAdmin
+                })
+                .ToListAsync();
+
+            if (format == "pdf")
+            {
+                var htmlContent = await RenderViewToStringAsync("MemberListReport", members);
+
+                HtmlToPdf converter = new HtmlToPdf();
+                PdfDocument doc = converter.ConvertHtmlString(htmlContent);
+
+                var pdfBytes = doc.Save();
+                doc.Close();
+
+                return File(pdfBytes, "application/pdf", "MemberListReport.pdf");
+            }
+            else if (format == "excel")
+            {
+                using (var workbook = new XLWorkbook())
+                {
+                    var worksheet = workbook.Worksheets.Add("Members");
+
+                    worksheet.Cell(1, 1).Value = "Member ID";
+                    worksheet.Cell(1, 2).Value = "Display Name";
+                    worksheet.Cell(1, 3).Value = "Email";
+                    worksheet.Cell(1, 5).Value = "Is Admin";
+
+                    int row = 2;
+                    foreach (var member in members)
+                    {
+                        worksheet.Cell(row, 1).Value = member.UserID;
+                        worksheet.Cell(row, 2).Value = member.Name;
+                        worksheet.Cell(row, 3).Value = member.Email;
+                        worksheet.Cell(row, 5).Value = member.IsAdmin;
+                        row++;
+                    }
+
+                    using (var stream = new MemoryStream())
+                    {
+                        workbook.SaveAs(stream);
+                        var content = stream.ToArray();
+                        return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "MemberListReport.xlsx");
+                    }
+                }
+            }
+
+            return RedirectToAction("Reports");
+        }
+
+// Generate Member Detail Report
+public async Task<IActionResult> GenerateMemberDetailReport(int userId, string format)
+{
+    var member = await _dbContext.Users
+        .Include(u => u.Reviews) // Assuming the member has reviews
+        .Include(u => u.Events) // Assuming the member has events they attended
+        .FirstOrDefaultAsync(u => u.UserID == userId);
+
+    if (member == null)
+    {
+        return NotFound();
+    }
+
+    if (format == "pdf")
+    {
+        var htmlContent = await RenderViewToStringAsync("MemberDetailReport", member);
+
+        // Convert HTML to PDF
+        HtmlToPdf converter = new HtmlToPdf();
+        PdfDocument doc = converter.ConvertHtmlString(htmlContent);
+
+        var pdfBytes = doc.Save();
+        doc.Close();
+
+        var fileName = $"MemberDetailReport_{member.Name}.pdf";
+        return File(pdfBytes, "application/pdf", fileName);
+    }
+    else if (format == "excel")
+    {
+        using (var workbook = new XLWorkbook())
+        {
+            var worksheet = workbook.Worksheets.Add("Member Detail");
+
+            worksheet.Cell(1, 1).Value = "Member ID";
+            worksheet.Cell(1, 2).Value = member.UserID;
+
+            worksheet.Cell(2, 1).Value = "Display Name";
+            worksheet.Cell(2, 2).Value = member.Name;
+
+            worksheet.Cell(3, 1).Value = "Email";
+            worksheet.Cell(3, 2).Value = member.Email;
+            
+            worksheet.Cell(5, 1).Value = "Is Admin";
+            worksheet.Cell(5, 2).Value = member.IsAdmin;
+
+            if (member.Reviews != null && member.Reviews.Any())
+            {
+                var reviewSheet = workbook.Worksheets.Add("Reviews");
+
+                // Add review headers
+                reviewSheet.Cell(1, 1).Value = "Game Title";
+                reviewSheet.Cell(1, 2).Value = "Review Text";
+                reviewSheet.Cell(1, 4).Value = "Date";
+
+                int row = 2;
+                foreach (var review in member.Reviews)
+                {
+                    reviewSheet.Cell(row, 1).Value = review.Game.Title;
+                    reviewSheet.Cell(row, 2).Value = review.ReviewText;
+                    reviewSheet.Cell(row, 4).Value = review.SubmissionDate.ToString("yyyy-MM-dd");
+                    row++;
+                }
+            }
+
+            if (member.Events != null && member.Events.Any())
+            {
+                var eventSheet = workbook.Worksheets.Add("Events");
+
+                // Add event headers
+                eventSheet.Cell(1, 1).Value = "Event Title";
+                eventSheet.Cell(1, 2).Value = "Event Date";
+                eventSheet.Cell(1, 3).Value = "Location";
+
+                int row = 2;
+                foreach (var eventItem in member.Events)
+                {
+                    eventSheet.Cell(row, 1).Value = eventItem.Name;
+                    eventSheet.Cell(row, 2).Value = eventItem.EventDate.ToString("yyyy-MM-dd");
+                    eventSheet.Cell(row, 3).Value = eventItem.Description;
+                    row++;
+                }
+            }
+
+            using (var stream = new MemoryStream())
+            {
+                workbook.SaveAs(stream);
+                var content = stream.ToArray();
+
+                var fileName = $"MemberDetailReport_{member.Name}.xlsx";
+                return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+        }
+    }
+
+    return RedirectToAction("Reports");
+}
 
         // Generate Game Detail Report
         public async Task<IActionResult> GenerateGameDetailReport(int gameId, string format)
@@ -205,14 +360,17 @@ namespace Group6WebProject.Controllers
 
             return RedirectToAction("Reports");
         }
+        
 
         public IActionResult Reports()
         {
+            var users = _dbContext.Users.ToList();  // Assuming _dbContext is your database context
             var games = _dbContext.Games.ToList();
-            ViewBag.Games = games;
+            ViewBag.Users = users;  // Pass the list of users to the view
+            ViewBag.Games = games; // Similarly, pass the games to the view
             return View();
         }
-
+        
         public bool IsAdmin()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

@@ -1,0 +1,29 @@
+﻿@model IEnumerable<Group6WebProject.Data.User>
+
+
+@{
+    ViewBag.Title = "title";
+    Layout = "_Layout";
+}
+
+<table>
+    <thead>
+    <tr>
+        <th>Member ID</th>
+        <th>Display Name</th>
+        <th>Email</th>
+        <th>Is Admin</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var member in Model)
+    {
+        <tr>
+            <td>@member.UserID</td>
+            <td>@member.Name</td>
+            <td>@member.Email</td>
+            <td>@member.IsAdmin</td>
+        </tr>
+    }
+    </tbody>
+</table>

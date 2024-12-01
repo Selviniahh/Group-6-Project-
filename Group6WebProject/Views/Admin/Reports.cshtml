@@ -18,10 +18,30 @@ Layout = "_Layout";
         <select name="gameId" id="gameId" class="form-control" style="width: 300px;">
             @foreach (var game in ViewBag.Games as List<Group6WebProject.Models.Game>)
             {
-            <option value="@game.Id">@game.Title</option>
+                <option value="@game.Id">@game.Title</option>
             }
         </select>
     </div>
     <button type="submit" name="format" value="pdf" class="btn btn-primary">Download PDF</button>
     <button type="submit" name="format" value="excel" class="btn btn-primary">Download Excel</button>
+</form>
+
+<h3>Member List Report</h3>
+<a asp-action="GenerateMemberListReport" asp-route-format="pdf" class="btn btn-primary">Download PDF</a>
+<a asp-action="GenerateMemberListReport" asp-route-format="excel" class="btn btn-primary">Download Excel</a>
+
+<h3>Member Detail Report</h3>
+    <form asp-action="GenerateMemberDetailReport" method="get">
+        <div class="form-group">
+            <label for="UserId">Select a User ID</label>
+            <select name="userId" id="userId" class="form-control" style="width: 300px;">
+                @foreach (var users in ViewBag.Users as List<Group6WebProject.Data.User>)
+                {
+                <option value="@users.UserID">@users.Name</option>
+                }
+            </select>
+        </div>
+        <button type="submit" name="format" value="pdf" class="btn btn-primary">Download PDF</button>
+        <button type="submit" name="format" value="excel" class="btn btn-primary">Download Excel</button>
+    
 </form>

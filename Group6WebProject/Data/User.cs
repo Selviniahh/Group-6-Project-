@@ -40,6 +40,7 @@ public class User
     public const int LockOutTimer = 15;
     public int LockOutCounter = 0;
     
+    public ICollection<Event> Events { get; set; } = new List<Event>();
     public ICollection<GameReview> Reviews { get; set; } = new List<GameReview>();
     public ICollection<User> FriendsAndFamily { get; set; } = new List<User>();
 }
