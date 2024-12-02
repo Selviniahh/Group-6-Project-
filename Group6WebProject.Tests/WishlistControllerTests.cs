@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
+namespace Group6WebProject.Tests;
+
 public class WishListControllerTests
 {
     [Fact]

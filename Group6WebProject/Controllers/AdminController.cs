@@ -23,7 +23,8 @@ namespace Group6WebProject.Controllers
         private readonly IServiceProvider _serviceProvider;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AdminController(ApplicationDbContext context, ICompositeViewEngine viewEngine, ITempDataProvider tempDataProvider, IServiceProvider serviceProvider, IHttpContextAccessor httpContext)
+        public AdminController(ApplicationDbContext context, ICompositeViewEngine viewEngine,
+            ITempDataProvider tempDataProvider, IServiceProvider serviceProvider, IHttpContextAccessor httpContext)
         {
             _dbContext = context;
             _viewEngine = viewEngine;
@@ -36,7 +37,8 @@ namespace Group6WebProject.Controllers
         private async Task<string> RenderViewToStringAsync(string viewName, object model)
         {
             // Ensure the HttpContext has the necessary services
-            var httpContext = _httpContextAccessor.HttpContext ?? new DefaultHttpContext { RequestServices = _serviceProvider };
+            var httpContext = _httpContextAccessor.HttpContext ??
+                              new DefaultHttpContext { RequestServices = _serviceProvider };
 
             // Create a new RouteData and set the controller to "Admin"
             var routeData = new RouteData();
@@ -51,17 +53,20 @@ namespace Group6WebProject.Controllers
             if (!viewResult.Success)
             {
                 var searchedLocations = string.Join(Environment.NewLine, viewResult.SearchedLocations);
-                throw new InvalidOperationException($"View '{viewName}' not found. Searched locations:{Environment.NewLine}{searchedLocations}");
+                throw new InvalidOperationException(
+                    $"View '{viewName}' not found. Searched locations:{Environment.NewLine}{searchedLocations}");
             }
 
             using (var sw = new StringWriter())
             {
                 // Create the ViewDataDictionary and TempDataDictionary
-                var viewData = new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary()) { Model = model };
+                var viewData = new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary())
+                    { Model = model };
                 var tempData = new TempDataDictionary(httpContext, _tempDataProvider);
 
                 // Create the ViewContext
-                var viewContext = new ViewContext(actionContext, viewResult.View, viewData, tempData, sw, new HtmlHelperOptions());
+                var viewContext = new ViewContext(actionContext, viewResult.View, viewData, tempData, sw,
+                    new HtmlHelperOptions());
 
                 // Render the view to the StringWriter
                 await viewResult.View.RenderAsync(viewContext);
@@ -70,7 +75,6 @@ namespace Group6WebProject.Controllers
                 return sw.ToString();
             }
         }
-
 
 
         public async Task<IActionResult> GenerateGameListReport(string format)
@@ -118,14 +122,15 @@ namespace Group6WebProject.Controllers
                     {
                         workbook.SaveAs(stream);
                         var content = stream.ToArray();
-                        return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "GameListReport.xlsx");
+                        return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            "GameListReport.xlsx");
                     }
                 }
             }
 
             return RedirectToAction("Reports");
         }
-        
+
         // Generate Member List Report
         public async Task<IActionResult> GenerateMemberListReport(string format)
         {
@@ -151,7 +156,7 @@ namespace Group6WebProject.Controllers
                 using (var workbook = new XLWorkbook())
                 {
                     var worksheet = workbook.Worksheets.Add("Members");
-                
+
                     worksheet.Cell(1, 1).Value = "Member ID";
                     worksheet.Cell(1, 2).Value = "Display Name";
                     worksheet.Cell(1, 3).Value = "Email";
@@ -173,127 +178,129 @@ namespace Group6WebProject.Controllers
                         workbook.SaveAs(stream);
                         var content = stream.ToArray();
 
-                        return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "MemberListReport.xlsx");
+                        return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            "MemberListReport.xlsx");
                     }
                 }
             }
+
             return RedirectToAction("Reports");
         }
 
 
-
         public async Task<IActionResult> GenerateMemberDetailReport(int userId, string format)
-{
-    // Fetch the member details
-    var member = await _dbContext.Users
-        .Include(u => u.Reviews)
-        .ThenInclude(r => r.Game) // Ensure Game details are included
-        .FirstOrDefaultAsync(u => u.UserID == userId);
-
-    if (member == null)
-    {
-        return NotFound();
-    }
-
-    // Fetch events the user is registered for
-    var registeredEvents = await _dbContext.EventRegister
-        .Where(er => er.UserId == userId)
-        .Select(er => er.Event)
-        .ToListAsync();
-
-    if (format == "pdf")
-    {
-        // Pass to Razor view for PDF generation
-        var viewModel = new MemberDetailViewModel
         {
-            User = member,
-            RegisteredEvents = registeredEvents
-        };
+            // Fetch the member details
+            var member = await _dbContext.Users
+                .Include(u => u.Reviews)
+                .ThenInclude(r => r.Game) // Ensure Game details are included
+                .FirstOrDefaultAsync(u => u.UserID == userId);
 
-        var htmlContent = await RenderViewToStringAsync("MemberDetailReport", viewModel);
-
-        // Convert HTML to PDF
-        HtmlToPdf converter = new HtmlToPdf();
-        PdfDocument doc = converter.ConvertHtmlString(htmlContent);
-
-        var pdfBytes = doc.Save();
-        doc.Close();
-
-        var fileName = $"MemberDetailReport_{member.Name}.pdf";
-        return File(pdfBytes, "application/pdf", fileName);
-    }
-    else if (format == "excel")
-    {
-        // Generate Excel file
-        using (var workbook = new XLWorkbook())
-        {
-            // Add Member Details worksheet
-            var worksheet = workbook.Worksheets.Add("Member Detail");
-
-            worksheet.Cell(1, 1).Value = "Member ID";
-            worksheet.Cell(1, 2).Value = member.UserID;
-
-            worksheet.Cell(2, 1).Value = "Display Name";
-            worksheet.Cell(2, 2).Value = member.Name;
-
-            worksheet.Cell(3, 1).Value = "Email";
-            worksheet.Cell(3, 2).Value = member.Email;
-
-            worksheet.Cell(4, 1).Value = "Is Admin";
-            worksheet.Cell(4, 2).Value = member.IsAdmin;
-
-            // Add Reviews worksheet if present
-            if (member.Reviews != null && member.Reviews.Any())
+            if (member == null)
             {
-                var reviewSheet = workbook.Worksheets.Add("Reviews");
-                reviewSheet.Cell(1, 1).Value = "Game Title";
-                reviewSheet.Cell(1, 2).Value = "Review Text";
-                reviewSheet.Cell(1, 3).Value = "Submission Date";
-                reviewSheet.Cell(1, 4).Value = "Review Status";
+                return NotFound();
+            }
 
-                int row = 2;
-                foreach (var review in member.Reviews)
+            // Fetch events the user is registered for
+            var registeredEvents = await _dbContext.EventRegister
+                .Where(er => er.UserId == userId)
+                .Select(er => er.Event)
+                .ToListAsync();
+
+            if (format == "pdf")
+            {
+                // Pass to Razor view for PDF generation
+                var viewModel = new MemberDetailViewModel
                 {
-                    reviewSheet.Cell(row, 1).Value = review.Game?.Title ?? "N/A";
-                    reviewSheet.Cell(row, 2).Value = review.ReviewText;
-                    reviewSheet.Cell(row, 3).Value = review.SubmissionDate.ToString("yyyy-MM-dd");
-                    reviewSheet.Cell(row, 4).Value = review.ReviewStatus;
-                    row++;
+                    User = member,
+                    RegisteredEvents = registeredEvents
+                };
+
+                var htmlContent = await RenderViewToStringAsync("MemberDetailReport", viewModel);
+
+                // Convert HTML to PDF
+                HtmlToPdf converter = new HtmlToPdf();
+                PdfDocument doc = converter.ConvertHtmlString(htmlContent);
+
+                var pdfBytes = doc.Save();
+                doc.Close();
+
+                var fileName = $"MemberDetailReport_{member.Name}.pdf";
+                return File(pdfBytes, "application/pdf", fileName);
+            }
+            else if (format == "excel")
+            {
+                // Generate Excel file
+                using (var workbook = new XLWorkbook())
+                {
+                    // Add Member Details worksheet
+                    var worksheet = workbook.Worksheets.Add("Member Detail");
+
+                    worksheet.Cell(1, 1).Value = "Member ID";
+                    worksheet.Cell(1, 2).Value = member.UserID;
+
+                    worksheet.Cell(2, 1).Value = "Display Name";
+                    worksheet.Cell(2, 2).Value = member.Name;
+
+                    worksheet.Cell(3, 1).Value = "Email";
+                    worksheet.Cell(3, 2).Value = member.Email;
+
+                    worksheet.Cell(4, 1).Value = "Is Admin";
+                    worksheet.Cell(4, 2).Value = member.IsAdmin;
+
+                    // Add Reviews worksheet if present
+                    if (member.Reviews != null && member.Reviews.Any())
+                    {
+                        var reviewSheet = workbook.Worksheets.Add("Reviews");
+                        reviewSheet.Cell(1, 1).Value = "Game Title";
+                        reviewSheet.Cell(1, 2).Value = "Review Text";
+                        reviewSheet.Cell(1, 3).Value = "Submission Date";
+                        reviewSheet.Cell(1, 4).Value = "Review Status";
+
+                        int row = 2;
+                        foreach (var review in member.Reviews)
+                        {
+                            reviewSheet.Cell(row, 1).Value = review.Game?.Title ?? "N/A";
+                            reviewSheet.Cell(row, 2).Value = review.ReviewText;
+                            reviewSheet.Cell(row, 3).Value = review.SubmissionDate.ToString("yyyy-MM-dd");
+                            reviewSheet.Cell(row, 4).Value = review.ReviewStatus;
+                            row++;
+                        }
+                    }
+
+                    // Add Registered Events worksheet if present
+                    if (registeredEvents != null && registeredEvents.Any())
+                    {
+                        var eventSheet = workbook.Worksheets.Add("Registered Events");
+                        eventSheet.Cell(1, 1).Value = "Event Title";
+                        eventSheet.Cell(1, 2).Value = "Event Date";
+                        eventSheet.Cell(1, 3).Value = "Description";
+
+                        int row = 2;
+                        foreach (var eventItem in registeredEvents)
+                        {
+                            eventSheet.Cell(row, 1).Value = eventItem.Name;
+                            eventSheet.Cell(row, 2).Value = eventItem.EventDate.ToString("yyyy-MM-dd");
+                            eventSheet.Cell(row, 3).Value = eventItem.Description;
+                            row++;
+                        }
+                    }
+
+                    // Save workbook to memory stream and return as file
+                    using (var stream = new MemoryStream())
+                    {
+                        workbook.SaveAs(stream);
+                        var content = stream.ToArray();
+
+                        var fileName = $"MemberDetailReport_{member.Name}.xlsx";
+                        return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            fileName);
+                    }
                 }
             }
 
-            // Add Registered Events worksheet if present
-            if (registeredEvents != null && registeredEvents.Any())
-            {
-                var eventSheet = workbook.Worksheets.Add("Registered Events");
-                eventSheet.Cell(1, 1).Value = "Event Title";
-                eventSheet.Cell(1, 2).Value = "Event Date";
-                eventSheet.Cell(1, 3).Value = "Description";
-
-                int row = 2;
-                foreach (var eventItem in registeredEvents)
-                {
-                    eventSheet.Cell(row, 1).Value = eventItem.Name;
-                    eventSheet.Cell(row, 2).Value = eventItem.EventDate.ToString("yyyy-MM-dd");
-                    eventSheet.Cell(row, 3).Value = eventItem.Description;
-                    row++;
-                }
-            }
-
-            // Save workbook to memory stream and return as file
-            using (var stream = new MemoryStream())
-            {
-                workbook.SaveAs(stream);
-                var content = stream.ToArray();
-
-                var fileName = $"MemberDetailReport_{member.Name}.xlsx";
-                return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
-            }
+            return RedirectToAction("Reports");
         }
-    }
-
-    return RedirectToAction("Reports");
-}
 
         // Generate Game Detail Report
         public async Task<IActionResult> GenerateGameDetailReport(int gameId, string format)
@@ -371,20 +378,21 @@ namespace Group6WebProject.Controllers
                         var content = stream.ToArray();
 
                         var fileName = $"GameDetailReport_{game.Title}.xlsx";
-                        return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+                        return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            fileName);
                     }
                 }
             }
 
             return RedirectToAction("Reports");
-        } 
-        
+        }
+
         public async Task<IActionResult> GenerateWishlistReport(string format)
         {
             // Fetch users and wishlist items
             var userWishlists = await _dbContext.Users
                 .Include(u => u.WishlistItems)
-                .ThenInclude(w => w.Game)    
+                .ThenInclude(w => w.Game)
                 .ToListAsync();
 
 
@@ -405,7 +413,7 @@ namespace Group6WebProject.Controllers
                 using (var workbook = new XLWorkbook())
                 {
                     var worksheet = workbook.Worksheets.Add("Wishlists");
-                    
+
                     worksheet.Cell(1, 1).Value = "User Name";
                     worksheet.Cell(1, 2).Value = "Game Title";
                     worksheet.Cell(1, 3).Value = "Game Genre";
@@ -431,7 +439,8 @@ namespace Group6WebProject.Controllers
                     {
                         workbook.SaveAs(stream);
                         var content = stream.ToArray();
-                        return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "WishlistReport.xlsx");
+                        return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            "WishlistReport.xlsx");
                     }
                 }
             }
@@ -441,13 +450,13 @@ namespace Group6WebProject.Controllers
 
         public IActionResult Reports()
         {
-            var users = _dbContext.Users.ToList();  // Assuming _dbContext is your database context
+            var users = _dbContext.Users.ToList(); // Assuming _dbContext is your database context
             var games = _dbContext.Games.ToList();
-            ViewBag.Users = users;  // Pass the list of users to the view
+            ViewBag.Users = users; // Pass the list of users to the view
             ViewBag.Games = games; // Similarly, pass the games to the view
             return View();
         }
-        
+
         public bool IsAdmin()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -487,7 +496,7 @@ namespace Group6WebProject.Controllers
             {
                 return Forbid();
             }
-            
+
             if (ModelState.IsValid)
             {
                 _dbContext.Games.Add(game);
@@ -751,80 +760,81 @@ namespace Group6WebProject.Controllers
                 "Other"
             };
         }
-        
-        public async Task<IActionResult> GenerateSalesReport(DateTime? startDate, DateTime? endDate, string format = "pdf")
-{
-    // Fetch sales data using existing models
-    var salesData = await _dbContext.Orders
-        .Include(o => o.OrderItems)
-        .ThenInclude(oi => oi.Game)
-        .Include(o => o.User)
-        .Where(o => (!startDate.HasValue || o.OrderDate >= startDate) &&
-                    (!endDate.HasValue || o.OrderDate <= endDate) &&
-                    o.Status == "Processed")
-        .ToListAsync();
 
-    if (salesData == null || !salesData.Any())
-    {
-        Console.WriteLine("No sales data available for the selected date range.");
-        return Content("No sales data available for the selected date range.");
-    }
-
-    
-    if (format.ToLower() == "pdf")
-    {
-        var htmlContent = await RenderViewToStringAsync("SalesReport", salesData);
-
-        HtmlToPdf converter = new HtmlToPdf();
-        PdfDocument doc = converter.ConvertHtmlString(htmlContent);
-
-        var pdfBytes = doc.Save();
-        doc.Close();
-
-        return File(pdfBytes, "application/pdf", "SalesReport.pdf");
-    }
-    else if (format.ToLower() == "excel")
-    {
-        using (var workbook = new XLWorkbook())
+        public async Task<IActionResult> GenerateSalesReport(DateTime? startDate, DateTime? endDate,
+            string format = "pdf")
         {
-            var worksheet = workbook.Worksheets.Add("Sales Report");
+            // Fetch sales data using existing models
+            var salesData = await _dbContext.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Game)
+                .Include(o => o.User)
+                .Where(o => (!startDate.HasValue || o.OrderDate >= startDate) &&
+                            (!endDate.HasValue || o.OrderDate <= endDate) &&
+                            o.Status == "Processed")
+                .ToListAsync();
 
-            worksheet.Cell(1, 1).Value = "Order ID";
-            worksheet.Cell(1, 2).Value = "Member Name";
-            worksheet.Cell(1, 3).Value = "Date";
-            worksheet.Cell(1, 4).Value = "Game Title";
-            worksheet.Cell(1, 5).Value = "Quantity";
-            worksheet.Cell(1, 6).Value = "Price";
-            worksheet.Cell(1, 7).Value = "Total";
-
-            int row = 2;
-            foreach (var order in salesData)
+            if (salesData == null || !salesData.Any())
             {
-                foreach (var item in order.OrderItems)
+                Console.WriteLine("No sales data available for the selected date range.");
+                return Content("No sales data available for the selected date range.");
+            }
+
+
+            if (format.ToLower() == "pdf")
+            {
+                var htmlContent = await RenderViewToStringAsync("SalesReport", salesData);
+
+                HtmlToPdf converter = new HtmlToPdf();
+                PdfDocument doc = converter.ConvertHtmlString(htmlContent);
+
+                var pdfBytes = doc.Save();
+                doc.Close();
+
+                return File(pdfBytes, "application/pdf", "SalesReport.pdf");
+            }
+            else if (format.ToLower() == "excel")
+            {
+                using (var workbook = new XLWorkbook())
                 {
-                    worksheet.Cell(row, 1).Value = order.OrderID;
-                    worksheet.Cell(row, 2).Value = order.User.Name;
-                    worksheet.Cell(row, 3).Value = order.OrderDate.ToString("yyyy-MM-dd");
-                    worksheet.Cell(row, 4).Value = item.Game.Title;
-                    worksheet.Cell(row, 5).Value = item.Quantity;
-                    worksheet.Cell(row, 6).Value = item.Price;
-                    worksheet.Cell(row, 7).Value = item.Quantity * item.Price;
-                    row++;
+                    var worksheet = workbook.Worksheets.Add("Sales Report");
+
+                    worksheet.Cell(1, 1).Value = "Order ID";
+                    worksheet.Cell(1, 2).Value = "Member Name";
+                    worksheet.Cell(1, 3).Value = "Date";
+                    worksheet.Cell(1, 4).Value = "Game Title";
+                    worksheet.Cell(1, 5).Value = "Quantity";
+                    worksheet.Cell(1, 6).Value = "Price";
+                    worksheet.Cell(1, 7).Value = "Total";
+
+                    int row = 2;
+                    foreach (var order in salesData)
+                    {
+                        foreach (var item in order.OrderItems)
+                        {
+                            worksheet.Cell(row, 1).Value = order.OrderID;
+                            worksheet.Cell(row, 2).Value = order.User.Name;
+                            worksheet.Cell(row, 3).Value = order.OrderDate.ToString("yyyy-MM-dd");
+                            worksheet.Cell(row, 4).Value = item.Game.Title;
+                            worksheet.Cell(row, 5).Value = item.Quantity;
+                            worksheet.Cell(row, 6).Value = item.Price;
+                            worksheet.Cell(row, 7).Value = item.Quantity * item.Price;
+                            row++;
+                        }
+                    }
+
+                    using (var stream = new MemoryStream())
+                    {
+                        workbook.SaveAs(stream);
+                        return File(stream.ToArray(),
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "SalesReport.xlsx");
+                    }
                 }
             }
 
-            using (var stream = new MemoryStream())
-            {
-                workbook.SaveAs(stream);
-                return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "SalesReport.xlsx");
-            }
+            return View("SalesReport", salesData);
+            //return RedirectToAction("Reports");
+            ;
         }
-    }
-
-    return View("SalesReport", salesData);
-    //return RedirectToAction("Reports");
-    ;
-}
-
     }
 }
