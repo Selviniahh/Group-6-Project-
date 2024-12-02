@@ -751,5 +751,80 @@ namespace Group6WebProject.Controllers
                 "Other"
             };
         }
+        
+        public async Task<IActionResult> GenerateSalesReport(DateTime? startDate, DateTime? endDate, string format = "pdf")
+{
+    // Fetch sales data using existing models
+    var salesData = await _dbContext.Orders
+        .Include(o => o.OrderItems)
+        .ThenInclude(oi => oi.Game)
+        .Include(o => o.User)
+        .Where(o => (!startDate.HasValue || o.OrderDate >= startDate) &&
+                    (!endDate.HasValue || o.OrderDate <= endDate) &&
+                    o.Status == "Processed")
+        .ToListAsync();
+
+    if (salesData == null || !salesData.Any())
+    {
+        Console.WriteLine("No sales data available for the selected date range.");
+        return Content("No sales data available for the selected date range.");
+    }
+
+    
+    if (format.ToLower() == "pdf")
+    {
+        var htmlContent = await RenderViewToStringAsync("SalesReport", salesData);
+
+        HtmlToPdf converter = new HtmlToPdf();
+        PdfDocument doc = converter.ConvertHtmlString(htmlContent);
+
+        var pdfBytes = doc.Save();
+        doc.Close();
+
+        return File(pdfBytes, "application/pdf", "SalesReport.pdf");
+    }
+    else if (format.ToLower() == "excel")
+    {
+        using (var workbook = new XLWorkbook())
+        {
+            var worksheet = workbook.Worksheets.Add("Sales Report");
+
+            worksheet.Cell(1, 1).Value = "Order ID";
+            worksheet.Cell(1, 2).Value = "Member Name";
+            worksheet.Cell(1, 3).Value = "Date";
+            worksheet.Cell(1, 4).Value = "Game Title";
+            worksheet.Cell(1, 5).Value = "Quantity";
+            worksheet.Cell(1, 6).Value = "Price";
+            worksheet.Cell(1, 7).Value = "Total";
+
+            int row = 2;
+            foreach (var order in salesData)
+            {
+                foreach (var item in order.OrderItems)
+                {
+                    worksheet.Cell(row, 1).Value = order.OrderID;
+                    worksheet.Cell(row, 2).Value = order.User.Name;
+                    worksheet.Cell(row, 3).Value = order.OrderDate.ToString("yyyy-MM-dd");
+                    worksheet.Cell(row, 4).Value = item.Game.Title;
+                    worksheet.Cell(row, 5).Value = item.Quantity;
+                    worksheet.Cell(row, 6).Value = item.Price;
+                    worksheet.Cell(row, 7).Value = item.Quantity * item.Price;
+                    row++;
+                }
+            }
+
+            using (var stream = new MemoryStream())
+            {
+                workbook.SaveAs(stream);
+                return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "SalesReport.xlsx");
+            }
+        }
+    }
+
+    return View("SalesReport", salesData);
+    //return RedirectToAction("Reports");
+    ;
+}
+
     }
 }
